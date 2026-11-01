@@ -8,8 +8,11 @@ on:
 permissions:
   contents: read
 
+# GitHub permits only one pending run per concurrency group. A shared main
+# group can silently replace an older pending main run even when cancellation
+# is disabled. Preserve each main quality gate while cancelling superseded PRs.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
