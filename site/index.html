@@ -36,7 +36,7 @@ html:lang(en) .reader-zh,html:lang(zh) .reader-en{display:none!important}@media(
         <a href="#models" data-i18n="nav.models">Models</a>
         <a href="#protocol" data-i18n="nav.protocol">Protocol</a>
         <a href="#start" data-i18n="nav.start">Quick start</a>
-        <a href="https://github.com/turinglambdaai/permit">GitHub</a>
+        <a href="https://github.com/turlamai/permit">GitHub</a>
         <button class="text-button" id="lang-button" type="button" aria-label="Switch language">中文</button>
         <button class="theme-button" id="theme-button" type="button" aria-label="Toggle color theme">
           <span class="theme-light" aria-hidden="true">◐</span>
@@ -53,7 +53,7 @@ html:lang(en) .reader-zh,html:lang(zh) .reader-en{display:none!important}@media(
         <p class="lede" data-i18n="hero.lede">Permit gives independent software a small, open format for product rights that work offline and stay manageable online.</p>
         <div class="hero-actions">
           <a class="button primary" href="#start" data-i18n="hero.start">Get started</a>
-          <a class="button secondary" href="https://github.com/turinglambdaai/permit/blob/main/docs/protocol-v1.md" data-i18n="hero.spec">Read Protocol v1</a>
+          <a class="button secondary" href="https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md" data-i18n="hero.spec">Read Protocol v1</a>
         </div>
         <div class="proof-row" aria-label="Core properties">
           <span><i></i><b data-i18n="proof.offline">Offline-verifiable</b></span>
@@ -231,12 +231,12 @@ html:lang(en) .reader-zh,html:lang(zh) .reader-en{display:none!important}@media(
         <p class="eyebrow" data-i18n="start.eyebrow">RACKET REFERENCE IMPLEMENTATION</p>
         <h2 data-i18n="start.title">From zero to verified.</h2>
         <p data-i18n="start.lede">Install the package, generate a key pair, sign a payload, then verify it with only the public trust store.</p>
-        <a class="text-link" href="https://github.com/turinglambdaai/permit" data-i18n="start.source">Browse source and test vectors →</a>
+        <a class="text-link" href="https://github.com/turlamai/permit" data-i18n="start.source">Browse source and test vectors →</a>
       </div>
       <div class="terminal" aria-label="Permit command line example">
         <div class="terminal-bar"><i></i><i></i><i></i><span>permit — shell</span></div>
         <pre><code><span class="prompt">$</span> raco pkg install --auto \
-  --name permit https://github.com/turinglambdaai/permit.git
+  --name permit https://github.com/turlamai/permit.git
 
 <span class="prompt">$</span> raco permit keygen \
   --private private-key.der \
@@ -260,17 +260,17 @@ html:lang(en) .reader-zh,html:lang(zh) .reader-en{display:none!important}@media(
       </div>
       <p data-i18n="boundary.body">Permit v0.1 does not implement payments, accounts, pricing, tax, email, dashboards, hosted metering, or a license server. Commerce owns the family payment-to-rights workflow and may issue credentials through the explicit issuer boundary; it does not belong in the verification core.</p>
     </section>
-  <section id="adoption" class="product-start"><h2 class="reader-en " lang="en">Build one verifiable result.</h2><h2 class="reader-zh " lang="zh">先完成一个可验证的结果。</h2><p class="reader-en " lang="en">Compose Permit beside an application when signed, offline-verifiable rights are needed. Start with an entitlement and omit activation unless the product explicitly needs an online lease. Free products do not need a licensing subsystem.</p><p class="reader-zh " lang="zh">需要签名且可离线验证的权益时，在应用旁组合 Permit。从 entitlement 开始；只有产品明确需要在线租约时才增加 activation。免费产品不需要授权子系统。</p><p class="reader-en " lang="en">The Racket implementation requires the runtime and crypto dependencies declared by the package. Protocol v1 is implemented, but a stable 1.0 compatibility promise has not been declared. Independent verifiers must execute the normative vectors.</p><p class="reader-zh " lang="zh">Racket 实现需要包声明的运行时与加密依赖。Protocol v1 已实现，但尚未宣布稳定 1.0 兼容承诺。独立验证器必须执行权威测试向量。</p><p class="reader-en " lang="en">Keep issuer private keys server-side and public trust stores in clients. Verify first, then evaluate product/time/feature policy. Revisions replace snapshots the client has received; they do not revoke an offline credential immediately. Preserve backup/rotation paths for perpetual rights and separate entitlement keys from update/publisher keys.</p><p class="reader-zh " lang="zh">签发私钥留在签发端，客户端仅持公钥信任库。先验签，再判断产品、时间和功能政策。revision 替换客户端已收到的快照，不会立即撤销离线凭据。为永久权益保留备份和轮换路径，权益密钥与更新、发行者密钥分离。</p><div class="start-links"><a class="reader-en" lang="en" href="https://github.com/turinglambdaai/permit/blob/main/docs/USING.md">Getting started, compatibility &amp; support</a><a class="reader-zh" lang="zh" href="https://github.com/turinglambdaai/permit/blob/main/docs/USING.zh-CN.md">入门、兼容与支持</a></div></section>
+  <section id="adoption" class="product-start"><h2 class="reader-en " lang="en">Build one verifiable result.</h2><h2 class="reader-zh " lang="zh">先完成一个可验证的结果。</h2><p class="reader-en " lang="en">Compose Permit beside an application when signed, offline-verifiable rights are needed. Start with an entitlement and omit activation unless the product explicitly needs an online lease. Free products do not need a licensing subsystem.</p><p class="reader-zh " lang="zh">需要签名且可离线验证的权益时，在应用旁组合 Permit。从 entitlement 开始；只有产品明确需要在线租约时才增加 activation。免费产品不需要授权子系统。</p><p class="reader-en " lang="en">The Racket implementation requires the runtime and crypto dependencies declared by the package. Protocol v1 is implemented, but a stable 1.0 compatibility promise has not been declared. Independent verifiers must execute the normative vectors.</p><p class="reader-zh " lang="zh">Racket 实现需要包声明的运行时与加密依赖。Protocol v1 已实现，但尚未宣布稳定 1.0 兼容承诺。独立验证器必须执行权威测试向量。</p><p class="reader-en " lang="en">Keep issuer private keys server-side and public trust stores in clients. Verify first, then evaluate product/time/feature policy. Revisions replace snapshots the client has received; they do not revoke an offline credential immediately. Preserve backup/rotation paths for perpetual rights and separate entitlement keys from update/publisher keys.</p><p class="reader-zh " lang="zh">签发私钥留在签发端，客户端仅持公钥信任库。先验签，再判断产品、时间和功能政策。revision 替换客户端已收到的快照，不会立即撤销离线凭据。为永久权益保留备份和轮换路径，权益密钥与更新、发行者密钥分离。</p><div class="start-links"><a class="reader-en" lang="en" href="https://github.com/turlamai/permit/blob/main/docs/USING.md">Getting started, compatibility &amp; support</a><a class="reader-zh" lang="zh" href="https://github.com/turlamai/permit/blob/main/docs/USING.zh-CN.md">入门、兼容与支持</a></div></section>
 </main>
 
   <footer>
     <div class="footer-brand"><span class="brand-mark" aria-hidden="true">P</span><b>Permit</b></div>
     <p data-i18n="footer.tagline">Signed product rights for independent software.</p>
     <div class="footer-links">
-      <a href="https://github.com/turinglambdaai/permit">GitHub</a>
-      <a href="https://github.com/turinglambdaai/permit/blob/main/docs/protocol-v1.md">Protocol v1</a>
-      <a href="https://github.com/turinglambdaai/permit/blob/main/SECURITY.md">Security</a>
-      <a href="https://github.com/turinglambdaai/permit/blob/main/LICENSE">Apache-2.0</a>
+      <a href="https://github.com/turlamai/permit">GitHub</a>
+      <a href="https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md">Protocol v1</a>
+      <a href="https://github.com/turlamai/permit/blob/main/SECURITY.md">Security</a>
+      <a href="https://github.com/turlamai/permit/blob/main/LICENSE">Apache-2.0</a>
     </div>
   </footer>
 
