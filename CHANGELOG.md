@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Repair stale pre-rename GitHub URLs in the contributor guide and signed
+  v0.2.0 release evidence link; include every root Markdown entry (including
+  ROADMAP and CONTRIBUTING) in the documentation-link CI gate.
+
 - Prefer OpenSSL 3 Ed25519 and use an explicit libsodium backend fallback
   where available, without mutating the caller's global crypto-factory
   parameter. Extend RFC 8032 known-answer, rejection and ambient-factory

@@ -89,7 +89,7 @@ Other modules are implementation details in v0.x even when Racket allows requiri
 
 ## Management components
 
-[Commerce](https://github.com/turinglambdaai/commerce) is the family owner for
+[Commerce](https://github.com/turlamai/commerce) is the family owner for
 provider-neutral payment orchestration, commercial projections, rights
 intents, issuance workflow, claim delivery, and operator audit. Its explicit
 issuer adapter may consume `permit/issuer`; Permit never imports Commerce.
@@ -97,4 +97,4 @@ Identity providers or product services continue to own login and account
 recovery. Any management component outputs signed credentials; the client
 remains useful without it and never treats an online response boolean as
 authority. The complete ownership graph lives in the
-[family architecture](https://github.com/turinglambdaai/keel/blob/main/docs/family-architecture.md).
+[family architecture](https://github.com/turlamai/keel/blob/main/docs/family-architecture.md).

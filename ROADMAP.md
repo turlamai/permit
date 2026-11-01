@@ -20,7 +20,7 @@ product integration, rather than by adding credential types. Evidence owners
 are [the release changelog](CHANGELOG.md),
 [the security review](docs/security-review-2026-10.md),
 [the gptp-studio integration record](docs/integration-evidence.md), and the
-[published signed source artifacts](https://github.com/turinglambdaai/permit/releases/tag/v0.2.0).
+[published signed source artifacts](https://github.com/turlamai/permit/releases/tag/v0.2.0).
 The original acceptance criteria remain useful for later releases:
 
 1. Complete an independent security-focused review of exact-byte signature

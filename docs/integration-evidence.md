@@ -8,7 +8,7 @@ the first integration. Later integrations append their own sections.
 
 ## gptp-studio (first integration, 2026-10-16)
 
-[gptp-studio](https://github.com/turinglambdaai/gptp-studio) is an
+[gptp-studio](https://github.com/turlamai/gptp-studio) is an
 automotive PTP engineering desktop (Rivet line, Racket + GTK). Its
 commercial gate historically carried a self-rolled RSA-2048 +
 canonical-JSON license module; integration replaced it with Permit

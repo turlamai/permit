@@ -12,7 +12,7 @@ Permit v0.1 implements the protocol, offline verifier, local policy engine, and 
 
 ## Commerce management plane
 
-[Commerce](https://github.com/turinglambdaai/commerce) is the family repository
+[Commerce](https://github.com/turlamai/commerce) is the family repository
 for the provider-neutral commercial management plane. Its current foundation
 does not yet implement every item below; its roadmap, not Permit, owns their
 delivery:
