@@ -15,10 +15,10 @@ Payment providers can tell you that money moved. Account systems can tell you wh
 ## Cryptographic runtime requirements
 
 Permit requires a working native **Ed25519** implementation to verify or issue
-credentials. The Racket reference prefers OpenSSL 3+ and may use libsodium
-when OpenSSL's Ed25519 support is unavailable. If neither provider is usable,
-cryptographic operations fail closed; compiling the package is not evidence
-that its runtime is supported. See the
+credentials. The Racket reference tries OpenSSL 3+, libsodium, libgcrypt,
+then Nettle, using only explicit upstream crypto-lib Ed25519 providers.
+If none is usable, cryptographic operations fail closed; compiling the package
+is not evidence that its runtime is supported. See the
 [native backend diagnostics and official package-build evidence](docs/crypto-runtime.md).
 
 ## Start here
