@@ -3,7 +3,6 @@
 (require crypto
          (only-in crypto/libcrypto libcrypto-factory)
          (only-in crypto/sodium sodium-factory)
-         (only-in crypto/gcrypt gcrypt-factory)
          (only-in crypto/nettle nettle-factory)
          racket/file
          "private/encoding.rkt")
@@ -24,11 +23,11 @@
 ;; compile while having no Ed25519 backend at runtime. Try an explicit,
 ;; reviewed set of crypto-lib native providers instead of its ambient,
 ;; possibly shifting all-factories list. Prefer OpenSSL 3 and libsodium for
-;; continuity, then use libgcrypt or Nettle if they support Ed25519.
+;; continuity, then use Nettle when its Ed25519 implementation is available.
 ;; If every provider is unavailable, signing and verification fail closed.
 ;; Do not mutate the caller's crypto-factories parameter on import.
 (define factories
-  (list libcrypto-factory sodium-factory gcrypt-factory nettle-factory))
+  (list libcrypto-factory sodium-factory nettle-factory))
 
 (define (ed25519-key? key private?)
   (and (pk-key? key)
