@@ -3,6 +3,8 @@
 (require crypto
          (only-in crypto/libcrypto libcrypto-factory)
          (only-in crypto/sodium sodium-factory)
+         (only-in crypto/gcrypt gcrypt-factory)
+         (only-in crypto/nettle nettle-factory)
          racket/file
          "private/encoding.rkt")
 
@@ -17,12 +19,16 @@
          public-key->base64
          base64->public-key)
 
-;; Racket's package build machines may lack a working OpenSSL 3 FFI even
-;; when the package itself compiles. Restrict Ed25519 to two audited native
-;; implementations (OpenSSL first, libsodium second), not the shifting
-;; crypto/all-factories list. A missing native provider still fails closed.
-;; Avoid mutating the caller thread's crypto-factories parameter on import.
-(define factories (list libcrypto-factory sodium-factory))
+;; The Racket package builder's natipkg image supplies OpenSSL 1.1, which
+;; does not satisfy crypto-lib's OpenSSL 3 provider. A source install can still
+;; compile while having no Ed25519 backend at runtime. Try an explicit,
+;; reviewed set of crypto-lib native providers instead of its ambient,
+;; possibly shifting all-factories list. Prefer OpenSSL 3 and libsodium for
+;; continuity, then use libgcrypt or Nettle if they support Ed25519.
+;; If every provider is unavailable, signing and verification fail closed.
+;; Do not mutate the caller's crypto-factories parameter on import.
+(define factories
+  (list libcrypto-factory sodium-factory gcrypt-factory nettle-factory))
 
 (define (ed25519-key? key private?)
   (and (pk-key? key)
