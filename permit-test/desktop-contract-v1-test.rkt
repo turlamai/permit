@@ -9,6 +9,7 @@
          racket/port
          "../permit/main.rkt"
          (only-in "../permit/issuer.rkt"
+                  exn:fail:permit:issue?
                   generate-ed25519-keypair
                   public-key->base64
                   entitlement-payload
