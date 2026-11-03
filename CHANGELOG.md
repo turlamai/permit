@@ -15,6 +15,14 @@
 
 ### Fixed
 
+- Add explicit libgcrypt and Nettle Ed25519 native-provider fallbacks to
+  Permit's fixed crypto-lib factory list for environments such as Racket's
+  isolated `x86_64-linux-natipkg` builder, which bundles OpenSSL 1.1 rather
+  than the OpenSSL 3 required by crypto-lib. Run RFC 8032 signing and
+  invalid-signature checks independently against every present backend;
+  preserve fail-closed behavior if none is available. Official package-builder
+  revalidation is still pending; do not infer a pass from GitHub CI.
+
 - Repair stale pre-rename GitHub URLs in the contributor guide and signed
   v0.2.0 release evidence link; include every root Markdown entry (including
   ROADMAP and CONTRIBUTING) in the documentation-link CI gate.
