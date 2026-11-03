@@ -3,7 +3,7 @@
 Permit Protocol v1 requires **Ed25519**, not a choice of signature algorithm.
 The Racket reference implementation uses a fixed, explicit list of native
 `crypto-lib` factories: **OpenSSL 3+** (`crypto/libcrypto`), **libsodium**
-(`crypto/sodium`), **libgcrypt** (`crypto/gcrypt`), then **Nettle**
+(`crypto/sodium`), then **Nettle**
 (`crypto/nettle`). These are Ed25519 providers supplied by the upstream
 cryptography package, not alternative signature algorithms. Available
 providers are checked independently against the RFC 8032 known-answer vector
@@ -14,23 +14,29 @@ a backend changes. There is no weak or non-cryptographic fallback.
 The native system libraries are optional at Racket package compilation time;
 they are required at **credential key generation, parsing, signing and
 verification** runtime. OpenSSL 3+ is normally available on full installations;
-libsodium needs a compatible shared library, libgcrypt needs its supported
-`libgcrypt` shared library, and Nettle needs compatible `libnettle` and
+libsodium needs a compatible shared library, and Nettle needs compatible
+`libnettle` and
 `libhogweed` libraries. Importability alone does not establish Ed25519
 capability. The Racket `x86_64-linux-natipkg-3` native-library package
 contains OpenSSL **1.1**, not OpenSSL 3, which explains why the OpenSSL 3
 factory may be unavailable even when the Racket distribution ships OpenSSL.
-Availability of the other three providers on an official builder VM must
+Availability of the other two providers on an official builder VM must
 be measured, not assumed. If none is usable, Permit raises an error and
 remains unable to authorize signed credentials; it must not silently accept
 a credential or skip signature checks.
+
+The optional upstream libgcrypt Ed25519 implementation is deliberately **not**
+a fallback here: the 2026-11-03 GitHub Linux Racket 9.3 test of PR #21
+showed that it rejects RFC 8032's empty-message known-answer signature with
+`Zero prefix in S-expression`. A provider that cannot sign all valid
+Ed25519 messages must not silently become a universal signing backend.
 
 ## Diagnosing an unsupported native environment
 
 Run in the exact Racket environment used to verify or issue credentials:
 
 ```sh
-racket -e '(require crypto crypto/libcrypto crypto/sodium crypto/gcrypt crypto/nettle) (for ([p (list (cons (quote openssl3) libcrypto-factory) (cons (quote sodium) sodium-factory) (cons (quote gcrypt) gcrypt-factory) (cons (quote nettle) nettle-factory))]) (displayln (list (car p) (factory-version (cdr p)) (and (get-pk (quote eddsa) (cdr p)) #t))))'
+racket -e '(require crypto crypto/libcrypto crypto/sodium crypto/nettle) (for ([p (list (cons (quote openssl3) libcrypto-factory) (cons (quote sodium) sodium-factory) (cons (quote nettle) nettle-factory))]) (displayln (list (car p) (factory-version (cdr p)) (and (get-pk (quote eddsa) (cdr p)) #t))))'
 raco test -p permit
 ```
 
@@ -49,10 +55,9 @@ ran on **2026-11-03 10:20–10:21 UTC**, on Racket 9.3
 issuer key generation, DER/key decoding, and signed-credential tests due to
 missing working Ed25519 providers, although install and documentation
 succeeded. Previous OpenSSL 3 + libsodium support was therefore insufficient
-for this service. This change adds only explicitly named upstream libgcrypt
-and Nettle providers; **official-build success is not established** until a
-new dated builder log on this exact change has zero failures. If neither
-extra provider exists in the isolated VM, the fix requires distributing an
+for this service. This change adds only the explicitly named upstream Nettle provider; **official-build success is not established** until a
+new dated builder log on this exact change has zero failures. If the additional
+provider does not exist in the isolated VM, the fix requires distributing an
 appropriate native dependency on `x86_64-linux-natipkg`, not suppressing
 the crypto tests.
 
