@@ -68,6 +68,11 @@
                          (lambda (out) (write-bytes (ed25519-private-key->der private-key) out))
                          #:mode 'binary
                          #:exists 'error)
+  ;; `call-with-output-file` creates the key with the process umask, which is
+  ;; commonly 022 and therefore world-readable. A signing key must not be.
+  ;; Windows has no POSIX mode bits; it only exposes the read-only flag.
+  (unless (eq? (system-type) 'windows)
+    (file-or-directory-permissions private-path #o600))
   (call-with-output-file public-path
                          (lambda (out) (write-bytes (ed25519-public-key->der public-key) out))
                          #:mode 'binary

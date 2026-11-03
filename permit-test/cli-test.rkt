@@ -25,6 +25,10 @@
             "--purpose" "entitlement")))
    (define store (read-trust-store trust-path))
    (define key (trust-store-key store "entitlement-only"))
-   (check-equal? (trust-key-purposes key) '("entitlement")))
+   (check-equal? (trust-key-purposes key) '("entitlement"))
+   ;; A signing key must not be world-readable. Windows exposes only the
+   ;; read-only attribute, so the POSIX mode check is skipped there.
+   (unless (eq? (system-type) 'windows)
+     (check-equal? (file-or-directory-permissions private-path 'bits) #o600)))
  (lambda ()
    (delete-directory/files temp-dir)))

@@ -16,3 +16,20 @@
                             #"[truegarbage]" #"{\"a\":falsex}"))])
     (check-exn exn:fail?
                (lambda () (read-json-bytes/strict 'test raw)))))
+
+(test-case "strict JSON rejects unescaped control characters"
+  ;; RFC 8259 requires U+0000 through U+001F inside a string to be escaped.
+  ;; A raw NUL is also forbidden outright by protocol v1.
+  (for ([raw (in-list (list
+                       (string->bytes/utf-8 "{\"value\":\"a\u0000b\"}")
+                       (string->bytes/utf-8 "{\"value\":\"a\u0001b\"}")
+                       (string->bytes/utf-8 "{\"value\":\"a\tb\"}")
+                       (string->bytes/utf-8 "{\"a\nb\":\"value\"}")) )])
+    (check-exn exn:fail?
+               (lambda () (read-json-bytes/strict 'test raw)))))
+
+(test-case "strict JSON keeps escaped non-NUL controls and rejects NUL escapes"
+  (check-equal? (read-json-bytes/strict 'test #"{\"value\":\"a\\u0001b\"}")
+                (hasheq 'value "a\u0001b"))
+  (check-exn exn:fail?
+             (lambda () (read-json-bytes/strict 'test #"{\"value\":\"a\\u0000b\"}"))))
