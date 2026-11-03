@@ -3,7 +3,6 @@
 (require crypto
          (only-in crypto/libcrypto libcrypto-factory)
          (only-in crypto/sodium sodium-factory)
-         (only-in crypto/gcrypt gcrypt-factory)
          (only-in crypto/nettle nettle-factory)
          json
          rackunit
@@ -37,7 +36,7 @@
 ;; If *all* providers are missing, importing the known-answer key below fails
 ;; and the security test remains red (rather than silently skipping).
 (define ed25519-factories
-  (list libcrypto-factory sodium-factory gcrypt-factory nettle-factory))
+  (list libcrypto-factory sodium-factory nettle-factory))
 (define private-key
   (datum->pk-key (list 'eddsa 'private 'ed25519 public-raw seed)
                  'rkt-private
