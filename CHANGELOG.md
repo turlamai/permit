@@ -15,11 +15,13 @@
 
 ### Fixed
 
-- Add explicit libgcrypt and Nettle Ed25519 native-provider fallbacks to
+- Add an explicit Nettle Ed25519 native-provider fallback to
   Permit's fixed crypto-lib factory list for environments such as Racket's
   isolated `x86_64-linux-natipkg` builder, which bundles OpenSSL 1.1 rather
   than the OpenSSL 3 required by crypto-lib. Run RFC 8032 signing and
-  invalid-signature checks independently against every present backend;
+  invalid-signature checks independently against every present backend.
+  The proposed libgcrypt fallback was rejected after it failed the RFC 8032
+  empty-message known-answer test in Linux CI;
   preserve fail-closed behavior if none is available. Official package-builder
   revalidation is still pending; do not infer a pass from GitHub CI.
 
