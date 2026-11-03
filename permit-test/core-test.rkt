@@ -3,6 +3,7 @@
 (require crypto
          (only-in crypto/libcrypto libcrypto-factory)
          (only-in crypto/sodium sodium-factory)
+         (only-in crypto/nettle nettle-factory)
          json
          rackunit
          racket/file
@@ -30,10 +31,12 @@
    (string-append "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e06522490155"
                   "5fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b")))
 
-;; Prefer OpenSSL but exercise the same RFC 8032 key against either
-;; independently supported provider. If neither backend exists, this
-;; security test must fail instead of silently skipping verification.
-(define ed25519-factories (list libcrypto-factory sodium-factory))
+;; Check every available native provider independently against RFC 8032,
+;; including providers usable on minimal Racket package-builder machines.
+;; If *all* providers are missing, importing the known-answer key below fails
+;; and the security test remains red (rather than silently skipping).
+(define ed25519-factories
+  (list libcrypto-factory sodium-factory nettle-factory))
 (define private-key
   (datum->pk-key (list 'eddsa 'private 'ed25519 public-raw seed)
                  'rkt-private
