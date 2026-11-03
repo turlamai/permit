@@ -32,9 +32,6 @@
    (hex-string->bytes "302e020100300506032b657004220420")
    (hex-string->bytes private-seed-hex)))
 
-(define private-key
-  (datum->pk-key private-key-der 'PrivateKeyInfo (list libcrypto-factory)))
-
 (define vector-files
   '(("managed-entitlement-payload.json" "managed-entitlement.permit.json")
     ("activation-payload.json" "activation.permit.json")
@@ -53,6 +50,12 @@
 (provide generate-vectors!)
 
 (define (generate-vectors!)
+  ;; Resolve the native provider only when maintainers intentionally regenerate
+  ;; fixtures. The official package builder imports every .rkt under this
+  ;; package during `raco test --drdr --package permit`; importing a generator
+  ;; must not require an Ed25519 signer or rewrite committed test vectors.
+  (define private-key
+    (datum->pk-key private-key-der 'PrivateKeyInfo (list libcrypto-factory)))
   (for ([entry (in-list vector-files)])
     (define payload-path (build-path vector-root (first entry)))
     (define credential-path (build-path vector-root (second entry)))
