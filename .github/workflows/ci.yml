@@ -40,7 +40,8 @@ jobs:
       # native provider; this check makes Nettle coverage mandatory in Linux.
       - name: Require Nettle Ed25519 vector coverage (Linux Racket 9.3)
         if: matrix.os == 'ubuntu-latest' && matrix.racket-version == '9.3'
-        run: racket -e '(require crypto crypto/nettle) (unless (get-pk (quote eddsa) nettle-factory) (error (quote permit-ci) "Nettle Ed25519 native provider unavailable: fallback vectors were not exercised"))'
+        run: |
+          racket -e '(require crypto crypto/nettle) (unless (get-pk (quote eddsa) nettle-factory) (error (quote permit-ci) "Nettle Ed25519 native provider unavailable: fallback vectors were not exercised"))'
 
   conformance-c:
     timeout-minutes: 10
