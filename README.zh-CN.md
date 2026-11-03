@@ -15,7 +15,7 @@ Permit 是一套与应用框架无关的协议及 Racket 参考实现，只回�
 ## 加密运行环境要求
 
 Permit 必须具备可用的原生 **Ed25519** 实现才能验签或签发。
-Racket 参考实现按固定顺序尝试 OpenSSL 3+、libsodium、libgcrypt 和 Nettle，
+Racket 参考实现按固定顺序尝试 OpenSSL 3+、libsodium 和 Nettle，
 它们均是上游 crypto-lib 提供的 Ed25519 实现，而不是降级签名算法。
 如果所有后端均不可用，必须拒绝密码学操作；源码编译成功不代表运行环境受支持。
 见[原生加密后端诊断及官方包构建证据](docs/crypto-runtime.md)。
