@@ -26,17 +26,17 @@
         'desktop-entitlement-status
         "(or/c verified-credential? #f)"
         credential))
-     (define status
-       (credential-status credential #:at at
-                          #:installation-id installation-id))
-     (define granted?
-       (edition-entitled? credential product edition
-                          #:at at
-                          #:version version
-                          #:installation-id installation-id))
-     (hasheq 'state (if granted? "pro" "free")
-             'entitled? granted?
-             'reasons (if granted?
-                          '()
-                          (append (map symbol->string (hash-ref status 'reasons))
-                                  '("not-entitled"))))]))
+     (let* ([status
+             (credential-status credential #:at at
+                                #:installation-id installation-id)]
+            [granted?
+             (edition-entitled? credential product edition
+                                #:at at
+                                #:version version
+                                #:installation-id installation-id)])
+       (hasheq 'state (if granted? "pro" "free")
+               'entitled? granted?
+               'reasons (if granted?
+                            '()
+                            (append (map symbol->string (hash-ref status 'reasons))
+                                    '("not-entitled"))))))]))
