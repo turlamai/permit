@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Added
+
+- Add a versioned, framework-neutral desktop client adapter example and
+  executable Ed25519 contract coverage for Free/Pro, expiry, signed trials,
+  product/version/installation mismatch, maintenance/feature windows,
+  revoked/rotated keys, and signed withdrawal revision ordering. Document
+  host RPC, app-owned trust roots, offline revocation limits and recovery
+  responsibilities. This does not claim complete product or official package
+  builder acceptance.
+
+
 ### Fixed
 
 - Repair stale pre-rename GitHub URLs in the contributor guide and signed

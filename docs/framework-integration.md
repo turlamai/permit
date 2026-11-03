@@ -94,3 +94,11 @@ commercial software inherit no policy or dependency.
 
 The canonical five-repository graph and release order are defined by the
 [family architecture](https://github.com/turlamai/keel/blob/main/docs/family-architecture.md).
+
+## Versioned desktop host contract
+
+For a Racket shared core hosted by SwiftUI, WinUI or GTK, use the
+[desktop client adapter contract v1](desktop-adapter-v1.md) and its
+[public-facade test harness](../permit-test/desktop-contract-v1-test.rkt).
+The host provides its own app-bundled trust root and persistence; the contract
+never makes Commerce, Rivet or Glaze a Permit dependency.

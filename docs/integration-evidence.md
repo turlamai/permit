@@ -66,3 +66,40 @@ None of these required a Permit API change; points 2 and 3 are product
 side. The integration confirmed the rotation design works as documented:
 retired keys preserved historical perpetual credentials while safe
 issuance refused new ones.
+
+
+## MoveBit (second product pilot, 2026-11-01)
+
+[MoveBit PR #82](https://github.com/turlamai/movebit/pull/82) merged as
+`aff7cbe17d71663f8ef03cb116cf0fa1b1d4e2cc`. It established
+a Free-first commercial policy and an **optional** Permit client adapter.
+[MoveBit PR #112](https://github.com/turlamai/movebit/pull/112) merged as
+`c46e17b5b59b06c44a2b2db8dfe568d75aff41ae`. The latter
+added a bounded signed-credential import into machine-local application
+storage, with an app-owned public trust-store injection seam. Its test
+workflow pinned Permit source commit
+`df47436013c5e3929c58dd809a97db77b2cfd423`, installed Permit
+only in the Linux integration job, then exercised real ephemeral Ed25519
+fixtures. The exact PR #112 head
+`59196c58b02a96b5b1bc04c506425b3574edf061` reported successful
+Racket test and packaged acceptance checks on Windows, Linux and macOS in
+GitHub on 2026-11-03.
+
+This is a **staged optional licensing core**, not an enabled checkout, Pro
+gate or shipped trust root. The host RPC and UI import are not enabled in
+those PRs. The regression cases explicitly include wrong-product and
+expired credentials, version mismatch, conflicting revision, newer signed
+withdrawal and attempted reimport of older rights. A valid *later*
+withdrawal is accepted even if the license now grants no Pro access.
+
+The portable learning is that revision comparison must happen **after**
+signature verification and **before** entitlement evaluation. This is
+covered in the [desktop adapter v1 contract](desktop-adapter-v1.md) and its
+in-repository Racket tests. But a local file is user-writable and provides
+no trusted monotonic anti-rollback ledger. An offline client may not
+observe remote refunds/revocations at all. The product must choose an
+activation/refresh policy if timely cancellation is promised.
+
+These product check results are not evidence that the public Racket package
+catalog's latest build succeeded; that is tracked separately in
+[the runtime gate](crypto-runtime.md).
