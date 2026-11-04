@@ -96,3 +96,52 @@
   (parameterize ([current-ed25519-backend 'pure])
     (check-true (ed25519-verify rfc-public #"" rfc-signature))
     (check-false (ed25519-verify rfc-public #"x" rfc-signature))))
+
+
+;; Private-key DER is an untrusted input boundary. Reject arbitrary embedded
+;; 04 22 04 20 markers, wrong OIDs/lengths, and trailing data instead of
+;; extracting a seed by searching for a matching byte sequence.
+(test-case "private-key DER must have a complete Ed25519 ASN.1 structure"
+  (define canonical (private-key-der rfc-seed))
+  (check-equal? (der->seed canonical) rfc-seed)
+  (define altered-oid (bytes-copy canonical))
+  (bytes-set! altered-oid 11 #x71)
+  (check-exn exn:fail? (lambda () (der->seed altered-oid)))
+  (check-exn exn:fail?
+             (lambda () (der->seed (bytes-append #"\x04\x22\x04\x20" rfc-seed))))
+  (check-exn exn:fail?
+             (lambda () (der->seed (bytes-append canonical #"\x00")))))
+
+(test-case "RFC 5958 private key embedded public half must match the seed"
+  ;; crypto-lib writes OneAsymmetricKey with an IMPLICIT [1] public BIT STRING.
+  (define oak
+    (bytes-append
+     #"\x30\x51\x02\x01\x01\x30\x05\x06\x03\x2b\x65\x70\x04\x22\x04\x20"
+     rfc-seed
+     #"\x81\x21\x00"
+     rfc-public))
+  (check-equal? (der->seed oak) rfc-seed)
+  (parameterize ([current-ed25519-backend 'pure])
+    (call-with-temporary-bytes
+     oak
+     (lambda (path)
+       (check-equal? (ed25519-sign (read-ed25519-private-key path) #"")
+                     rfc-signature))))
+  (define mismatched-public (bytes-copy oak))
+  (bytes-set! mismatched-public 51
+              (bitwise-xor (bytes-ref mismatched-public 51) 1))
+  (parameterize ([current-ed25519-backend 'pure])
+    (call-with-temporary-bytes
+     mismatched-public
+     (lambda (path)
+       (check-exn exn:fail? (lambda () (read-ed25519-private-key path))))))
+  (define wrong-tag (bytes-copy oak))
+  (bytes-set! wrong-tag 48 #x80)
+  (check-exn exn:fail? (lambda () (der->seed wrong-tag))))
+
+(test-case "pure Ed25519 private-key wrapper never prints raw seed bytes"
+  (parameterize ([current-ed25519-backend 'pure])
+    (define-values (private public) (generate-ed25519-keypair))
+    (check-equal? (format "~s" private) "#<ed25519-key>")
+    (check-true (ed25519-verify public #"redacted"
+                                (ed25519-sign private #"redacted")))))
