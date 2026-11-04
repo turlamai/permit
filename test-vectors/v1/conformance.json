@@ -61,6 +61,18 @@
       "expected": "envelope-reject"
     },
     {
+      "name": "raw-nul-in-envelope-string",
+      "credential": "raw-nul-envelope.json",
+      "trust_store": "trust-store.json",
+      "expected": "json-structural-reject"
+    },
+    {
+      "name": "raw-0x01-in-envelope-string",
+      "credential": "raw-control-envelope.json",
+      "trust_store": "trust-store.json",
+      "expected": "json-structural-reject"
+    },
+    {
       "name": "authenticated-but-not-a-credential",
       "credential": "not-a-credential.permit.json",
       "trust_store": "trust-store.json",
