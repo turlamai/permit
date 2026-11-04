@@ -387,6 +387,13 @@
      (check-exn #rx"duplicate JSON object member"
                 (lambda () (read-envelope (vector-path (hash-ref test-case 'credential))))
                 case-name)]
+    [(equal? expected "json-structural-reject")
+     ;; Strict-JSON structural failure: duplicate member, raw control
+     ;; character, invalid escape, or trailing bytes. Kept distinct from
+     ;; envelope-shape rejection so both implementations report one class.
+     (check-exn exn:fail?
+                (lambda () (read-envelope (vector-path (hash-ref test-case 'credential))))
+                case-name)]
     [(boolean? expected)
      (define-values (actual reasons) (evaluate-policy-case test-case))
      (check-equal? actual expected case-name)

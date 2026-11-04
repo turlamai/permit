@@ -38,8 +38,10 @@ MSVC); the C standard library usage is deliberately portable.
    verification.
 3. Every case in `conformance.json`: verification outcomes, rejection
    classes (tampered payloads, unknown key ids, revoked keys, issuance
-   windows, key purposes, duplicate JSON members, aliased trust keys), and
-   policy decisions with exact failure reasons where the corpus fixes them.
+   windows, key purposes, duplicate JSON members, raw control characters in
+   JSON strings, aliased trust keys), and policy decisions with exact failure
+   reasons where the corpus fixes them. Structural JSON failures use
+   `json-structural-reject`; envelope-shape failures use `envelope-reject`.
 
 The rejection paths mirror the reference verification order: envelope
 structure, key lookup, signature, payload schema, issuer, issuance window,

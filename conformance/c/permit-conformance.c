@@ -2137,6 +2137,7 @@ static Outcome expect_outcome(const char *expected) {
   if (str_equals(expected, "key-purpose-reject")) return ERR_KEY_PURPOSE;
   if (str_equals(expected, "trust-store-reject")) return ERR_TRUST_STORE;
   if (str_equals(expected, "duplicate-json-reject")) return ERR_JSON_STRUCTURAL;
+  if (str_equals(expected, "json-structural-reject")) return ERR_JSON_STRUCTURAL;
   if (str_equals(expected, "envelope-reject")) return ERR_ENVELOPE;
   if (str_equals(expected, "payload-reject")) return ERR_PAYLOAD;
   if (str_equals(expected, "issuer-mismatch-reject")) return ERR_ISSUER_MISMATCH;
@@ -2298,6 +2299,23 @@ static void run_conformance(const char *dir, const TrustStore *store) {
           file.data ? json_parse_strict((const char *)file.data, file.len) : NULL;
       bytes_free(&file);
       int ok = envelope == NULL && strstr(g_error, "duplicate JSON object member") != NULL;
+      json_free(envelope);
+      report(ok, "%s", name);
+      continue;
+    }
+    if (expected_field->kind == J_STRING &&
+        str_equals(expected_field->str, "json-structural-reject")) {
+      /* Any strict-JSON structural failure: duplicate member, raw control
+         character, invalid escape, or trailing bytes. The class stays
+         distinct from envelope-shape rejection so both implementations
+         report the same reason. */
+      char *path = path_join(dir, obj_get(tc, "credential")->str);
+      Bytes file = read_whole_file(path);
+      free(path);
+      Json *envelope =
+          file.data ? json_parse_strict((const char *)file.data, file.len) : NULL;
+      bytes_free(&file);
+      int ok = envelope == NULL;
       json_free(envelope);
       report(ok, "%s", name);
       continue;

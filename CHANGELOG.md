@@ -4,6 +4,12 @@
 
 ### Added
 
+- Add cross-language conformance cases for raw control characters in JSON
+  strings. The corpus now distinguishes `json-structural-reject` (malformed
+  JSON: duplicate members, raw U+0000..U+001F, invalid escapes, trailing
+  bytes) from `envelope-reject` (valid JSON with the wrong envelope shape),
+  and both the Racket suite and the C runner report the same class.
+
 - Add a versioned, framework-neutral desktop client adapter example and
   executable Ed25519 contract coverage for Free/Pro, expiry, signed trials,
   product/version/installation mismatch, maintenance/feature windows,

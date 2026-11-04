@@ -1,0 +1,7 @@
+{
+  "permit_version": 1,
+  "algorithm": "Ed25519",
+  "key_id": "rfc8032-test-1",
+  "payload": "e30=",
+  "signature": "AAAA"
+}
