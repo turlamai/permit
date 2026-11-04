@@ -4,6 +4,19 @@
 
 ### Added
 
+- Add a pure-Racket `ed25519` fallback provider. Permit now selects
+  OpenSSL 3+, libsodium, Nettle, then the pure `ed25519` package, so key
+  generation, signing, and verification work on minimal builders (including
+  `x86_64-linux-natipkg`) and on machines without OpenSSL 3. The pure backend
+  is a complete RFC 8032 implementation, not a weaker algorithm; it is not
+  constant time, so production issuers should keep a native provider where
+  available. Key encodings are unchanged (PKCS#8 private, SPKI public), and
+  `current-ed25519-backend` pins `'auto`, `'native`, or `'pure` for diagnostics
+  and tests.
+
+
+### Added
+
 - Add cross-language conformance cases for raw control characters in JSON
   strings. The corpus now distinguishes `json-structural-reject` (malformed
   JSON: duplicate members, raw U+0000..U+001F, invalid escapes, trailing

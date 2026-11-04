@@ -1,7 +1,12 @@
 #lang info
 
 (define collection 'multi)
-(define deps '("base" "crypto-lib" "net-lib" "rackunit-lib"))
+(define deps
+  '("base"
+    "crypto-lib"
+    "net-lib"
+    "rackunit-lib"
+    ["ed25519" #:version "0.1"]))
 (define build-deps '("racket-doc" "scribble-lib"))
 (define pkg-desc "Offline-verifiable, online-manageable signed entitlements")
 (define version "0.2")

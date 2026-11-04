@@ -1,29 +1,26 @@
 # Native Ed25519 providers and official package-build evidence
 
 Permit Protocol v1 requires **Ed25519**, not a choice of signature algorithm.
-The Racket reference implementation uses a fixed, explicit list of native
-`crypto-lib` factories: **OpenSSL 3+** (`crypto/libcrypto`), **libsodium**
-(`crypto/sodium`), then **Nettle**
-(`crypto/nettle`). These are Ed25519 providers supplied by the upstream
-cryptography package, not alternative signature algorithms. Available
-providers are checked independently against the RFC 8032 known-answer vector
-and invalid-signature rejection in `permit-test/core-test.rkt`. The public
-credential envelope and exact-byte signing semantics do not change when
-a backend changes. There is no weak or non-cryptographic fallback.
+The Racket reference implementation tries a fixed, explicit list of native
+`crypto-lib` factories — **OpenSSL 3+** (`crypto/libcrypto`), **libsodium**
+(`crypto/sodium`), then **Nettle** (`crypto/nettle`) — and falls back to the
+pure-Racket [`ed25519`](https://pkgs.racket-lang.org/package/ed25519) package
+when none is usable. These are four Ed25519 implementations, not alternative
+signature algorithms. Available providers are checked independently against
+the RFC 8032 known-answer vector and invalid-signature rejection in
+`permit-test/core-test.rkt`, and the pure backend is cross-checked against
+native keys/signatures in `permit-test/pure-backend-test.rkt`. The public
+credential envelope and exact-byte signing semantics do not change when a
+backend changes. The pure backend is a complete RFC 8032 implementation, not
+a weaker algorithm; it is not constant time (see below).
 
-The native system libraries are optional at Racket package compilation time;
-they are required at **credential key generation, parsing, signing and
-verification** runtime. OpenSSL 3+ is normally available on full installations;
-libsodium needs a compatible shared library, and Nettle needs compatible
-`libnettle` and
-`libhogweed` libraries. Importability alone does not establish Ed25519
-capability. The Racket `x86_64-linux-natipkg-3` native-library package
-contains OpenSSL **1.1**, not OpenSSL 3, which explains why the OpenSSL 3
-factory may be unavailable even when the Racket distribution ships OpenSSL.
-Availability of the other two providers on an official builder VM must
-be measured, not assumed. If none is usable, Permit raises an error and
-remains unable to authorize signed credentials; it must not silently accept
-a credential or skip signature checks.
+Native system libraries remain optional at Racket package compilation time.
+At runtime Permit uses the first usable native provider and otherwise selects
+the pure backend, so key generation, parsing, signing, and verification work
+even on the official `x86_64-linux-natipkg` builder, which contains OpenSSL
+**1.1** rather than OpenSSL 3. The pure backend still rejects invalid
+signatures, `S >= L`, non-canonical point encodings, and malformed keys; it
+never silently accepts a credential or skips signature checks.
 
 The optional upstream libgcrypt Ed25519 implementation is deliberately **not**
 a fallback here: the 2026-11-03 GitHub Linux Racket 9.3 test of PR #21
@@ -52,14 +49,25 @@ cannot prove Ed25519 works.
 The [official `permit` package builder](https://pkg-build.racket-lang.org/server/built/test-fail/permit.txt)
 ran on **2026-11-03 10:20–10:21 UTC**, on Racket 9.3
 `x86_64-linux-natipkg`, and reported **7/151 failures**. Failures covered
-issuer key generation, DER/key decoding, and signed-credential tests due to
-missing working Ed25519 providers, although install and documentation
-succeeded. Previous OpenSSL 3 + libsodium support was therefore insufficient
-for this service. This change adds only the explicitly named upstream Nettle provider; **official-build success is not established** until a
-new dated builder log on this exact change has zero failures. If the additional
-provider does not exist in the isolated VM, the fix requires distributing an
-appropriate native dependency on `x86_64-linux-natipkg`, not suppressing
-the crypto tests.
+issuer key generation, DER/key decoding, and signed-credential tests because
+no working native Ed25519 provider existed, although install and documentation
+succeeded. That transcript is historical: Permit now ships a pure backend for
+exactly this environment. Official-build success is still established only by
+a new dated transcript with zero failures, not by the fallback's unit tests.
+Do not manufacture a green result by suppressing the crypto tests.
+
+## Pure backend
+
+- Package: `ed25519` v0.1, pure Racket, no FFI, RFC 8032 vectors plus OpenSSL
+  3 cross-checks in its own CI.
+- Selection: `current-ed25519-backend` is `'auto` (native first, then pure) by
+  default; `'native` and `'pure` pin a backend for diagnostics and tests.
+- Key encodings are unchanged: PKCS#8 private keys (the canonical 48-byte form
+  and the `OneAsymmetricKey` form crypto-lib emits) and 44-byte
+  `SubjectPublicKeyInfo` public keys.
+- **Not constant time.** Native providers remain preferred for production
+  issuers; the pure backend exists for verifiers and for environments where
+  no native provider is installable.
 
 Before calling a release or this issue resolved:
 
