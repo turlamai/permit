@@ -41,8 +41,12 @@
     (check-equal? (bytes-length signature) 64)
     (check-true (ed25519-verify public #"pure provider" signature))
     (check-false (ed25519-verify public #"Pure provider" signature))
-    (check-false (ed25519-verify public #"pure provider"
-                                 (bytes-append (subbytes signature 0 63) #"\x00")))))
+    ;; Flip a bit instead of overwriting the last byte with zero: a random
+    ;; signature already ends in zero once in 256 runs, which made this a
+    ;; flaky failure on the Racket 9.0 job.
+    (define tampered (bytes-copy signature))
+    (bytes-set! tampered 63 (bitwise-xor (bytes-ref tampered 63) #x01))
+    (check-false (ed25519-verify public #"pure provider" tampered))))
 
 (test-case "pure backend reproduces RFC 8032 test 1"
   (call-with-temporary-bytes
