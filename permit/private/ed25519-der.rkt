@@ -30,33 +30,33 @@
     (raise-argument-error 'private-key-der "32-byte seed" seed))
   (bytes-append pkcs8-prefix seed))
 
-;; Accept the canonical 48-byte form and the OneAsymmetricKey variant that
-;; appends an optional public key; both carry the seed at the same offset.
-(define seed-marker #"\x04\x22\x04\x20")
+;; crypto-lib emits RFC 5958 OneAsymmetricKey v1 with the Ed25519
+;; public key in the IMPLICIT [1] BIT STRING. Its complete DER encoding is:
+;;   30 51 02 01 01 30 05 06 03 2b 65 70 04 22 04 20 <seed>
+;;   81 21 00 <32-byte public key>
+;; The public half is checked against the seed by the caller.
+(define one-asymmetric-prefix
+  #"\x30\x51\x02\x01\x01\x30\x05\x06\x03\x2b\x65\x70\x04\x22\x04\x20")
+(define one-asymmetric-public-tag #"\x81\x21\x00")
 
-(define (find-bytes haystack needle)
-  (define limit (- (bytes-length haystack) (bytes-length needle)))
-  (let loop ([index 0])
-    (cond
-      [(> index limit) #f]
-      [(bytes=? needle (subbytes haystack index (+ index (bytes-length needle)))) index]
-      [else (loop (add1 index))])))
-
-;; Accept both the canonical 48-byte PrivateKeyInfo form and the
-;; OneAsymmetricKey v2 form that crypto-lib emits (version 1 plus an optional
-;; public key). Both carry the seed inside the same `04 22 04 20` octet string.
+;; No searching for an interior marker: a blob with a different algorithm,
+;; malformed length, wrong version or trailing bytes is not an Ed25519 key.
 (define (der->seed der)
   (unless (bytes? der)
     (raise-argument-error 'der->seed "bytes?" der))
-  (define marker (find-bytes der seed-marker))
-  (define seed-start (and marker (+ marker (bytes-length seed-marker))))
-  (unless (and seed-start
-               (>= (bytes-length der) (+ seed-start seed-length)))
+  (define size (bytes-length der))
+  (define canonical?
+    (and (= size 48)
+         (bytes=? (subbytes der 0 16) pkcs8-prefix)))
+  (define with-public?
+    (and (= size 83)
+         (bytes=? (subbytes der 0 16) one-asymmetric-prefix)
+         (bytes=? (subbytes der 48 51) one-asymmetric-public-tag)))
+  (unless (or canonical? with-public?)
     (raise-arguments-error 'der->seed
-                           "not an Ed25519 PKCS#8 private key"
-                           "bytes"
-                           (bytes-length der)))
-  (subbytes der seed-start (+ seed-start seed-length)))
+                           "not a canonical Ed25519 PrivateKeyInfo/OneAsymmetricKey"
+                           "bytes" size))
+  (subbytes der 16 48))
 
 (define (public-key-der public)
   (unless (and (bytes? public) (= public-key-length (bytes-length public)))
