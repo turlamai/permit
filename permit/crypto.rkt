@@ -44,7 +44,8 @@
 
 ;; A key is either a crypto-lib `pk-key` (native) or a raw 32-byte seed/public
 ;; key (pure). Callers treat it as opaque and use the functions below.
-(struct ed25519-key (backend private? value) #:transparent)
+;; An opaque representation prevents accidentally printing a private seed in logs.
+(struct ed25519-key (backend private? value))
 
 (define native-available?
   (delay
@@ -116,7 +117,14 @@
                                  "accepted formats"
                                  (if private? '(PrivateKeyInfo) '(SubjectPublicKeyInfo))))])
     (if private?
-        (der->seed raw)
+        (let ([seed (der->seed raw)])
+          ;; RFC 5958 OneAsymmetricKey may carry a public half. Its bytes
+          ;; must agree with the private seed; do not accept contradictory
+          ;; key material just because the container has a valid prefix.
+          (when (= (bytes-length raw) 83)
+            (unless (bytes=? (subbytes raw 51 83) (pure:secret->public seed))
+              (error who "Ed25519 private/public key mismatch")))
+          seed)
         (der->public-key raw))))
 
 (define (decode-key who raw formats private?)
