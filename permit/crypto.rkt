@@ -20,7 +20,8 @@
          ed25519-verify
          public-key->base64
          base64->public-key
-         current-ed25519-backend)
+         current-ed25519-backend
+         ed25519-provider-report)
 
 ;; The Racket package builder's natipkg image supplies OpenSSL 1.1, which does
 ;; not satisfy crypto-lib's OpenSSL 3 provider. Try an explicit, reviewed set
@@ -58,6 +59,32 @@
   (case (current-ed25519-backend)
     [(auto) (if (force native-available?) 'native 'pure)]
     [else (current-ed25519-backend)]))
+
+(define provider-specs
+  (list (cons 'openssl3 libcrypto-factory)
+        (cons 'libsodium sodium-factory)
+        (cons 'nettle nettle-factory)))
+
+;; Transport-neutral diagnostics for adopters and support: which backend is
+;; selected, which native providers exist, and whether each one implements
+;; EdDSA. The pure fallback is always reported as available.
+(define (ed25519-provider-report)
+  (hash 'backend (symbol->string (selected-backend))
+        'native-available? (force native-available?)
+        'providers
+        (for/list ([spec (in-list provider-specs)])
+          (define factory (cdr spec))
+          (define version
+            (with-handlers ([exn:fail? (lambda (_) #f)])
+              (factory-version factory)))
+          (define eddsa?
+            (and version
+                 (with-handlers ([exn:fail? (lambda (_) #f)])
+                   (and (get-pk 'eddsa factory) #t))))
+          (hash 'name (symbol->string (car spec))
+                'version (or version 'null)
+                'ed25519 eddsa?))
+        'pure-backend "ed25519 0.1"))
 
 (define (native-key? key private?)
   (and (pk-key? key)
