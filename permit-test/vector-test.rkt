@@ -118,11 +118,7 @@
   (define vector-envelope
     (read-envelope (build-path vector-root (hash-ref entry 'credential_file))))
   (check-equal? (bytes-length payload) (hash-ref entry 'payload_length))
-  (check-equal? (bytes->hex-string
-                 (parameterize
-                     ([crypto-factories
-                       (list libcrypto-factory sodium-factory)])
-                   (digest 'sha256 payload)))
+  (check-equal? (bytes->hex-string (sha256-bytes payload))
                 (hash-ref entry 'payload_sha256_hex))
   (check-equal? (permit-envelope-payload vector-envelope) payload)
   (check-equal? (permit-envelope-key-id vector-envelope)

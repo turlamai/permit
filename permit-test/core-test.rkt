@@ -12,6 +12,7 @@
          "../permit/crypto.rkt"
          "../permit/envelope.rkt"
          "../permit/policy.rkt"
+         "../permit/private/ed25519-der.rkt"
          "../permit/schema.rkt"
          "../permit/trust.rkt")
 
@@ -31,17 +32,31 @@
    (string-append "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e06522490155"
                   "5fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b")))
 
-;; Check every available native provider independently against RFC 8032,
-;; including providers usable on minimal Racket package-builder machines.
-;; If *all* providers are missing, importing the known-answer key below fails
-;; and the security test remains red (rather than silently skipping).
+;; Check RFC 8032 through the pure backend first, then every available native
+;; provider independently. The pure check must still run on the official
+;; package-builder VM, where no native Ed25519 provider exists; a missing
+;; provider must not turn this security test red by failing at module load.
 (define ed25519-factories
   (list libcrypto-factory sodium-factory nettle-factory))
+
+(define (call-with-private-seed seed-value thunk)
+  (define path (make-temporary-file "permit-core-seed~a"))
+  (dynamic-wind
+   void
+   (lambda ()
+     (call-with-output-file path
+       #:exists 'truncate/replace
+       (lambda (out) (write-bytes (private-key-der seed-value) out)))
+     (thunk path))
+   (lambda () (when (file-exists? path) (delete-file path)))))
+
 (define private-key
-  (datum->pk-key (list 'eddsa 'private 'ed25519 public-raw seed)
-                 'rkt-private
-                 ed25519-factories))
-(define public-key (pk-key->public-only-key private-key))
+  (call-with-private-seed
+   seed
+   (lambda (path)
+     (parameterize ([current-ed25519-backend 'pure])
+       (read-ed25519-private-key path)))))
+(define public-key (ed25519-private-key->public-key private-key))
 
 (check-equal? (ed25519-sign private-key #"") rfc-signature)
 (check-true (ed25519-verify public-key #"" rfc-signature))
