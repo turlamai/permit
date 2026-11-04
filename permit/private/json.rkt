@@ -65,6 +65,18 @@
                       (char=? (string-ref text (+ cursor k)) #\0)))
            (fail who "NUL escape in JSON string" "offset" cursor))
          (loop (+ cursor 2))]
+        ;; RFC 8259 requires U+0000 through U+001F to be escaped inside a
+        ;; string. Accepting a raw control character (including a raw NUL)
+        ;; would let a payload that this reader accepts be rejected by, or
+        ;; truncated in, the C conformance runner; protocol-v1 also forbids
+        ;; U+0000 in a string outright.
+        [(< (char->integer ch) 32)
+         (fail who
+               "unescaped control character in JSON string"
+               "offset"
+               cursor
+               "code"
+               (char->integer ch))]
         [else (loop (add1 cursor))])))
 
   (define (decode-object-key start end)

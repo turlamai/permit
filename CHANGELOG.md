@@ -15,6 +15,16 @@
 
 ### Fixed
 
+- Write the `keygen` private key with mode `0600` on POSIX systems. The
+  constructor previously inherited the process umask (commonly `022`),
+  leaving signing key material world-readable.
+
+- Reject unescaped control characters (U+0000 through U+001F) inside JSON
+  strings. The strict reader accepted raw NUL and other control bytes that
+  RFC 8259 requires to be escaped; a raw NUL also violates protocol v1's
+  "MUST NOT contain U+0000" rule and could diverge from the C runner. Escaped
+  non-NUL controls remain valid and `\u0000` remains rejected.
+
 - Add an explicit Nettle Ed25519 native-provider fallback to
   Permit's fixed crypto-lib factory list for environments such as Racket's
   isolated `x86_64-linux-natipkg` builder, which bundles OpenSSL 1.1 rather

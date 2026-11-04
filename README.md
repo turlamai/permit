@@ -88,7 +88,7 @@ raco permit keygen \
   --purpose entitlement
 ```
 
-`--purpose` may be repeated to create a least-privilege signing key. Omit it only when one small deployment intentionally uses a single key for every v1 credential type. Keep the private key out of source control and application bundles. Start from a schema-valid template under [`examples/`](examples/), then sign the exact bytes of the payload file:
+`--purpose` may be repeated to create a least-privilege signing key. Omit it only when one small deployment intentionally uses a single key for every v1 credential type. On POSIX systems `keygen` writes the private key with mode `0600`; keep it out of source control and application bundles. Start from a schema-valid template under [`examples/`](examples/), then sign the exact bytes of the payload file:
 
 ```bash
 raco permit issue \

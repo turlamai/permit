@@ -62,7 +62,7 @@ Security-critical schemas are closed: unknown fields outside `extensions` MUST b
 
 JSON object member names MUST be unique at every nesting level. Conforming verifiers MUST reject duplicates before authorization, including spellings that decode to the same member name. Cross-language implementations must not rely on first-wins or last-wins parser behavior.
 
-JSON strings MUST NOT contain U+0000. Escapes that decode to it (`\u0000`) are rejected: implementations compare string values with C-string or length-aware primitives, and a NUL inside a member name or identifier could alias a schema field. Non-NUL control-character escapes stay valid.
+JSON strings MUST NOT contain U+0000. Escapes that decode to it (`\u0000`) are rejected: implementations compare string values with C-string or length-aware primitives, and a NUL inside a member name or identifier could alias a schema field. Non-NUL control-character escapes stay valid, but an unescaped control character (U+0000 through U+001F) inside a string MUST be rejected; encoders must use the `\u00XX` form.
 
 Integer fields (`revision`, `entitlement_revision`, `offline_grace_seconds`, and every `limits` entry) MUST fit in a signed 64-bit integer (at most `9223372036854775807`). Conforming verifiers MUST reject larger integers rather than clamp or truncate them, so that implementations with and without arbitrary-precision integers decide identically. Real-valued capability values MUST be finite; `Infinity`, `-Infinity`, and `NaN` are rejected.
 
