@@ -357,11 +357,20 @@
          'null)))
   (write-json-line result))
 
+(define (doctor-command args)
+  (when (pair? args)
+    (die "doctor takes no arguments"))
+  (write-json-line
+   (hash 'ok #t
+         'crypto (ed25519-provider-report)))
+  0)
+
 (define (usage)
   (displayln "Permit — signed entitlements for independent software")
-  (displayln "usage: raco permit <keygen|issue|sign|verify|inspect|check> [options]")
+  (displayln "usage: raco permit <keygen|issue|sign|verify|inspect|check|doctor> [options]")
   (displayln "  issue   safely issue using trust-store key policy")
-  (displayln "  sign    low-level schema-valid signing without issuer policy"))
+  (displayln "  sign    low-level schema-valid signing without issuer policy")
+  (displayln "  doctor  print Ed25519 provider diagnostics as JSON"))
 
 (define (run-cli [args (vector->list (current-command-line-arguments))])
   (with-handlers ([exn:fail? (lambda (e)
@@ -382,6 +391,7 @@
          [(verify) (verify-command (cdr args))]
          [(inspect) (inspect-command (cdr args))]
          [(check) (check-command (cdr args))]
+         [(doctor) (doctor-command (cdr args))]
          [(help --help -h) (usage)]
          [else (die (format "unknown command: ~a" (car args)))])])))
 

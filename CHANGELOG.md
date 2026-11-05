@@ -4,6 +4,12 @@
 
 ### Added
 
+- Add `raco permit doctor`: one JSON object reporting the selected Ed25519
+  backend (`native` or `pure`), whether any native provider is available, each
+  provider's version and EdDSA support, and the pure fallback identity. It is
+  read-only, needs no key material, and gives adopters/support a deterministic
+  diagnostic instead of parsing error messages.
+
 - Add a pure-Racket `ed25519` fallback provider. Permit now selects
   OpenSSL 3+, libsodium, Nettle, then the pure `ed25519` package, so key
   generation, signing, and verification work on minimal builders (including

@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require rackunit
+(require json
+         rackunit
          racket/file
          racket/port
          "../permit/cli.rkt"
@@ -32,3 +33,18 @@
      (check-equal? (file-or-directory-permissions private-path 'bits) #o600)))
  (lambda ()
    (delete-directory/files temp-dir)))
+
+(test-case "doctor reports the selected Ed25519 backend as JSON"
+  (define output (open-output-bytes))
+  (define code
+    (parameterize ([current-output-port output])
+      (run-cli (list "doctor"))))
+  (define report (string->jsexpr (bytes->string/utf-8 (get-output-bytes output))))
+  (check-equal? code 0)
+  (check-true (hash-ref report 'ok))
+  (define crypto (hash-ref report 'crypto))
+  (check-true (and (member (hash-ref crypto 'backend) '("native" "pure")) #t))
+  (check-equal? (hash-ref crypto 'pure-backend) "ed25519 0.1")
+  (check-true (list? (hash-ref crypto 'providers)))
+  (check-true (ormap (lambda (p) (equal? (hash-ref p 'name) "openssl3"))
+                     (hash-ref crypto 'providers))))

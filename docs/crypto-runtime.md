@@ -33,9 +33,12 @@ Ed25519 messages must not silently become a universal signing backend.
 Run in the exact Racket environment used to verify or issue credentials:
 
 ```sh
+raco permit doctor
 racket -e '(require crypto crypto/libcrypto crypto/sodium crypto/nettle) (for ([p (list (cons (quote openssl3) libcrypto-factory) (cons (quote sodium) sodium-factory) (cons (quote nettle) nettle-factory))]) (displayln (list (car p) (factory-version (cdr p)) (and (get-pk (quote eddsa) (cdr p)) #t))))'
 raco test -p permit
 ```
+
+`raco permit doctor` prints `{backend, native-available?, providers[], pure-backend}` as JSON: the same provider selection the library uses, without needing key material.
 
 Each diagnostic line is `(provider version EdDSA-available?)`. A `#f`
 version means the native library was unavailable; an available library still

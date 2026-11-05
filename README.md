@@ -22,7 +22,8 @@ no native provider is usable. The pure fallback is a full RFC 8032
 implementation, not a weaker algorithm, and it is what keeps signing and
 verification working on minimal package-builder machines; it is not constant
 time, so production issuers should keep a native provider where possible.
-See the
+Run `raco permit doctor` to print the selected backend and per-provider
+Ed25519 availability as JSON. See the
 [native backend diagnostics and official package-build evidence](docs/crypto-runtime.md).
 
 ## Start here
