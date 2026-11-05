@@ -129,3 +129,43 @@ on signed withdrawals. Generic contracts live here; product-specific
 Free/Pro decisions and recovery UX remain in their products. Incompatible
 host RPC changes require a new contract version; signed wire changes follow
 the separate [Protocol compatibility policy](compatibility.md).
+
+## Host-facing JSON helper (`permit/adapter`)
+
+Hosts that do not want to compose verify → status → feature evaluation
+themselves can call the stable helper:
+
+```racket
+(require permit/adapter)
+
+(adapter-evaluate #:trust-store store
+                  #:product "gptp-studio"
+                  #:at "2026-10-20T00:00:00Z"
+                  #:credential-bytes credential-bytes
+                  #:feature "pcap-export"          ; optional
+                  #:installation-id "ins_..."      ; optional
+                  #:activation-bytes activation     ; optional
+                  #:trial-extension-bytes extensions) ; optional
+```
+
+It returns one non-sensitive hash that serializes directly to the host:
+
+| Key | Meaning |
+| --- | --- |
+| `contract_version` | `1`; bump only with an adapter-contract change |
+| `state` | `free`, `invalid`, `inactive`, or `pro` |
+| `usable?` | Boolean; `pro` is the only grant state |
+| `reasons` | Typed strings (`no-credential`, `signature`, `activation-required`, `use-expired`, `issued-in-future`, ...) |
+| `entitlement_id`, `revision`, `type` | Lineage identity for pinning; `null` when absent |
+| `feature_allowed` | Boolean, or `null` when no feature was asked |
+
+`invalid` means the import failed verification (forged, unknown key, malformed
+bytes); `inactive` means the credential is authentic but not usable for this
+product/time/installation. Hosts must not parse exception text: the typed
+`reasons` list is the contract. The helper never returns subject IDs, claims,
+raw bytes, or trust material, and never performs network I/O.
+
+`permit-test/adapter-test.rkt` exercises the same matrix as the table above:
+Free, perpetual Pro, tampered signature, malformed bytes, activation-required,
+activation + installation binding, expired trial, clock rollback, wrong
+product, and retired-key rotation.

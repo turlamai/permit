@@ -10,6 +10,16 @@
   read-only, needs no key material, and gives adopters/support a deterministic
   diagnostic instead of parsing error messages.
 
+- Add `permit/adapter`, a versioned host-facing helper that composes
+  verification, credential status, optional activation/trial extensions, and
+  one optional feature evaluation into a small non-sensitive hash:
+  `contract_version`, `state` (`free`/`invalid`/`inactive`/`pro`), `usable?`,
+  typed `reasons`, lineage id/revision/type, and `feature_allowed`. Hosts get
+  one stable shape instead of parsing verification exceptions or composing
+  policy themselves. Cross-product fixtures cover Free, perpetual Pro,
+  tampered/malformed input, activation-required, installation binding,
+  expired trial, clock rollback, wrong product, and retired-key rotation.
+
 - Add a pure-Racket `ed25519` fallback provider. Permit now selects
   OpenSSL 3+, libsodium, Nettle, then the pure `ed25519` package, so key
   generation, signing, and verification work on minimal builders (including
