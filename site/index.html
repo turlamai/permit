@@ -1,241 +1,289 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="zh-CN" data-kit-id="permit" data-kit-lang-key="permit-lang">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Permit — Signed product rights</title>
-  <meta name="description" content="Offline-verifiable, online-manageable signed product entitlements. An open protocol and Racket reference implementation.">
-  <meta name="theme-color" content="#f3f0e8">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-  <script>
-    (function () {
-      var theme = localStorage.getItem('permit-theme');
-      if (!theme) theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      document.documentElement.dataset.theme = theme;
-      var lang = localStorage.getItem('permit-lang');
-      if (!lang) lang = (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
-      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-    })();
-  </script>
-<style id="product-start-style">
-.product-start{max-width:1120px;margin:64px auto;padding:32px 24px;border-top:1px solid var(--border,#aaa);font:inherit;line-height:1.65}
-.product-start h2{font-size:clamp(1.7rem,3vw,2.4rem);letter-spacing:-.025em;margin:0 0 16px}.product-start h3{font-size:1.05rem;margin:0 0 10px}.product-start p{margin:0 0 16px;max-width:74ch}.product-start-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin:28px 0}.product-start a{text-decoration:underline;text-underline-offset:4px;overflow-wrap:anywhere}.product-start a:focus-visible{outline:2px solid currentColor;outline-offset:5px}.product-start .start-links{display:flex;gap:16px 24px;flex-wrap:wrap}.product-start .start-status{font-weight:600}.product-start .start-limits{font-size:.95em}
-html:lang(en) .reader-zh,html:lang(zh) .reader-en{display:none!important}@media(max-width:700px){.product-start{margin:40px auto;padding:24px 20px}.product-start-grid{grid-template-columns:1fr;gap:18px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permit — 签名的产品权益</title>
+    <meta name="description" content="离线可验证、在线可管理的签名产品权益。开放协议与 Racket 参考实现。">
+    <link rel="canonical" href="https://permit.jrtx.site/">
+    <meta name="theme-color" content="#D97757">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Permit">
+    <meta property="og:title" content="Permit — Signed product rights">
+    <meta property="og:description" content="Offline-verifiable, online-manageable signed product entitlements. An open protocol and Racket reference implementation.">
+    <meta property="og:url" content="https://permit.jrtx.site/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Permit — Signed product rights">
+    <meta name="twitter:description" content="Offline-verifiable, online-manageable signed product entitlements. An open protocol and Racket reference implementation.">
+
+    <!-- Theme + language pre-paint: apply before first paint, no flash.
+         Storage keys carry forward from the previous permit homepage. -->
+    <script>
+        (function () {
+            var t;
+            try { t = localStorage.getItem('permit-theme'); } catch (e) {}
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.dataset.theme = t;
+            var l;
+            try { l = localStorage.getItem('permit-lang'); } catch (e) {}
+            if (l !== 'zh' && l !== 'en') {
+                l = (navigator.language || 'zh').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+            }
+            document.documentElement.lang = l === 'zh' ? 'zh-CN' : 'en';
+        })();
+    </script>
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="family.css">
+    <link rel="stylesheet" href="site.css">
+    <link rel="preload" href="fonts/newsreader-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+    <script src="family.js" defer></script>
 </head>
+
 <body>
-  <header class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="#top" aria-label="Permit home">
-        <span class="brand-mark" aria-hidden="true">P</span>
-        <span>Permit</span>
-      </a>
-      <nav class="nav-links" aria-label="Primary navigation">
-        <a href="#why" data-i18n="nav.why">Why</a>
-        <a href="#models" data-i18n="nav.models">Models</a>
-        <a href="#protocol" data-i18n="nav.protocol">Protocol</a>
-        <a href="#start" data-i18n="nav.start">Quick start</a>
-        <a href="https://github.com/turlamai/permit">GitHub</a>
-        <button class="text-button" id="lang-button" type="button" aria-label="Switch language">中文</button>
-        <button class="theme-button" id="theme-button" type="button" aria-label="Toggle color theme">
-          <span class="theme-light" aria-hidden="true">◐</span>
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <main id="top">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow" data-i18n="hero.eyebrow">Protocol v1 · Ed25519 · Apache-2.0</p>
-        <h1 data-i18n="hero.title">Sign once.<br>Authorize anywhere.</h1>
-        <p class="lede" data-i18n="hero.lede">Permit gives independent software a small, open format for product rights that work offline and stay manageable online.</p>
-        <div class="hero-actions">
-          <a class="button primary" href="#start" data-i18n="hero.start">Get started</a>
-          <a class="button secondary" href="https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md" data-i18n="hero.spec">Read Protocol v1</a>
-        </div>
-        <div class="proof-row" aria-label="Core properties">
-          <span><i></i><b data-i18n="proof.offline">Offline-verifiable</b></span>
-          <span><i></i><b data-i18n="proof.online">Online-manageable</b></span>
-          <span><i></i><b data-i18n="proof.framework">Framework-neutral</b></span>
-        </div>
-      </div>
-
-      <div class="credential-stage" aria-label="Signed Permit credential">
-        <div class="orbit orbit-one"></div>
-        <div class="orbit orbit-two"></div>
-        <article class="credential-card">
-          <div class="credential-head">
-            <div>
-              <span class="micro" data-i18n="credential.label">SIGNED CREDENTIAL</span>
-              <h2>permit/v1</h2>
+    <header class="kit-nav">
+        <div class="kit-container kit-nav-inner">
+            <a class="kit-brand" href="#top">
+                <svg class="kit-brand-mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="#D97757"/><path fill="#FFFFFF" d="M20 14h17c9.4 0 15 5.2 15 13.6 0 8.6-5.8 13.9-15.3 13.9h-6.2V51H20V14Zm10.5 8.8v10h5.3c3.9 0 5.9-1.7 5.9-5s-2-5-5.9-5h-5.3Z"/></svg>
+                <span>Permit</span>
+            </a>
+            <nav class="kit-nav-links">
+                <a href="#why" data-i18n="nav.why">为什么</a>
+                <a href="#models" data-i18n="nav.models">产品模型</a>
+                <a href="#protocol" data-i18n="nav.protocol">协议</a>
+                <a href="#start" data-i18n="nav.start">快速开始</a>
+                <a href="https://github.com/turlamai/permit" data-i18n="nav.github">GitHub</a>
+            </nav>
+            <div class="kit-nav-actions">
+                <div class="kit-lang">
+                    <button class="kit-lang-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M1.8 8h12.4M8 1.8c-4.6 4-4.6 8.4 0 12.4 4.6-4 4.6-8.4 0-12.4z"/></svg>
+                        <span class="kit-lang-current">简体中文</span>
+                    </button>
+                    <ul class="kit-lang-menu">
+                        <li><button type="button" data-kit-lang="zh">简体中文</button></li>
+                        <li><button type="button" data-kit-lang="en">English</button></li>
+                    </ul>
+                </div>
+                <button class="kit-icon-btn kit-theme-toggle" type="button" aria-pressed="false" aria-label="Theme">
+                    <svg class="kit-icon-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="4"/><path d="M10 1.5v2M10 16.5v2M1.5 10h2M16.5 10h2M4 4l1.4 1.4M14.6 14.6L16 16M16 4l-1.4 1.4M5.4 14.6L4 16"/></svg>
+                    <svg class="kit-icon-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M16.5 12.2A7 7 0 0 1 7.8 3.5a7 7 0 1 0 8.7 8.7z"/></svg>
+                </button>
             </div>
-            <span class="verified"><span>✓</span> <span data-i18n="credential.verified">verified</span></span>
-          </div>
-          <dl>
-            <div><dt>type</dt><dd>entitlement</dd></div>
-            <div><dt>subject</dt><dd>org:studio-42</dd></div>
-            <div><dt>product</dt><dd>pro.desktop</dd></div>
-            <div><dt>edition</dt><dd>team</dd></div>
-            <div><dt>seats</dt><dd>12 named</dd></div>
-            <div><dt>use</dt><dd>perpetual</dd></div>
-          </dl>
-          <div class="signature">
-            <span>Ed25519</span>
-            <code>0a:30:14:14:d3:67…</code>
-          </div>
-        </article>
-        <div class="key-tag key-public"><span data-i18n="credential.public">public trust</span><b>active</b></div>
-        <div class="key-tag key-payload"><span data-i18n="credential.payload">exact payload</span><b>1,110 bytes</b></div>
-      </div>
-    </section>
+        </div>
+    </header>
 
-    <section id="why" class="section split">
-      <div class="section-heading">
-        <p class="eyebrow" data-i18n="why.eyebrow">THE MISSING PRODUCT LAYER</p>
-        <h2 data-i18n="why.title">Payments are not permissions.</h2>
-      </div>
-      <div class="prose">
-        <p data-i18n="why.p1">A payment event proves that money moved. An account proves identity. Neither gives an installed app a durable, portable answer to “what may this user run right now?”</p>
-        <p data-i18n="why.p2">Permit turns that answer into a signed artifact. The application verifies it locally with public keys it already trusts. Commerce or another explicit issuer service may issue or refresh credentials, but authorization never depends on that service being reachable.</p>
-      </div>
-    </section>
+    <main id="top">
+        <!-- Hero -->
+        <section class="kit-hero">
+            <div class="kit-container">
+                <span class="kit-eyebrow" data-i18n="hero.eyebrow">Protocol v1 · Ed25519 · Apache-2.0</span>
+                <h1><span data-i18n="hero.h1">签一次，</span> <span class="kit-accent-word" data-i18n="hero.h1-accent">到处都能验。</span></h1>
+                <p class="kit-lead" data-i18n="hero.lede">Permit 给独立软件一套小而开放的产品权益格式：离线可验证，需要时也能在线管理。</p>
+                <div class="kit-btn-row">
+                    <div class="kit-install" role="group" aria-label="Install command">
+                        <span class="kit-install-prompt" aria-hidden="true">$</span>
+                        <code>raco pkg install --auto --name permit https://github.com/turlamai/permit.git</code>
+                    </div>
+                </div>
+                <div class="kit-btn-row">
+                    <a class="kit-btn kit-btn--primary" href="#start" data-i18n="hero.start">快速开始</a>
+                    <a class="kit-btn kit-btn--secondary" href="https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md" data-i18n="hero.spec">阅读 Protocol v1</a>
+                </div>
+                <div class="kit-platforms hero-proof" aria-label="Core properties">
+                    <span class="kit-platform-chip" data-i18n="proof.offline">离线可验证</span>
+                    <span class="kit-platform-chip" data-i18n="proof.online">在线可管理</span>
+                    <span class="kit-platform-chip" data-i18n="proof.framework">与框架无关</span>
+                </div>
 
-    <section class="principles" aria-label="Permit principles">
-      <article>
-        <span class="index">01</span>
-        <h3 data-i18n="principle.one.title">Exact bytes, no ambiguity</h3>
-        <p data-i18n="principle.one.body">Ed25519 signs the decoded payload bytes exactly. Verifiers never parse and re-serialize JSON before checking the signature.</p>
-      </article>
-      <article>
-        <span class="index">02</span>
-        <h3 data-i18n="principle.two.title">Rights outlive connectivity</h3>
-        <p data-i18n="principle.two.body">Long-lived entitlements stand on their own. Products add short-lived activation leases only when their policy needs online control.</p>
-      </article>
-      <article>
-        <span class="index">03</span>
-        <h3 data-i18n="principle.three.title">Policy without platform lock-in</h3>
-        <p data-i18n="principle.three.body">Permit sits beside Rivet, Glaze, native apps, or any other runtime. The application framework never owns commercial policy.</p>
-      </article>
-    </section>
+                <!-- Signed credential showpiece -->
+                <div class="credential-stage" aria-label="Signed Permit credential">
+                    <div class="orbit orbit-one" aria-hidden="true"></div>
+                    <div class="orbit orbit-two" aria-hidden="true"></div>
+                    <article class="credential-card">
+                        <div class="credential-head">
+                            <div>
+                                <span class="micro" data-i18n="credential.label">签名凭证</span>
+                                <h2>permit/v1</h2>
+                            </div>
+                            <span class="verified"><span>✓</span> <span data-i18n="credential.verified">已验证</span></span>
+                        </div>
+                        <dl>
+                            <div><dt>type</dt><dd>entitlement</dd></div>
+                            <div><dt>subject</dt><dd>org:studio-42</dd></div>
+                            <div><dt>product</dt><dd>pro.desktop</dd></div>
+                            <div><dt>edition</dt><dd>team</dd></div>
+                            <div><dt>seats</dt><dd>12 named</dd></div>
+                            <div><dt>use</dt><dd>perpetual</dd></div>
+                        </dl>
+                        <div class="signature">
+                            <span>Ed25519</span>
+                            <code>0a:30:14:14:d3:67…</code>
+                        </div>
+                    </article>
+                    <div class="key-tag key-public"><span data-i18n="credential.public">公开信任</span><b>active</b></div>
+                    <div class="key-tag key-payload"><span data-i18n="credential.payload">精确 payload</span><b>1,110 bytes</b></div>
+                </div>
+            </div>
+        </section>
 
-    <section id="models" class="section models">
-      <div class="section-heading">
-        <p class="eyebrow" data-i18n="models.eyebrow">ONE VOCABULARY, DISTINCT WINDOWS</p>
-        <h2 data-i18n="models.title">Model the product you actually sell.</h2>
-        <p data-i18n="models.lede">Use rights, update eligibility, and access to newly published features are independent facts.</p>
-      </div>
-      <div class="model-table" role="table" aria-label="Supported commercial models">
-        <div class="model-row model-header" role="row">
-          <span role="columnheader" data-i18n="models.model">Model</span>
-          <span role="columnheader" data-i18n="models.use">Use</span>
-          <span role="columnheader" data-i18n="models.updates">Updates</span>
-          <span role="columnheader" data-i18n="models.features">New features</span>
-        </div>
-        <div class="model-row" role="row">
-          <strong role="cell" data-i18n="models.perpetual">Perpetual purchase</strong>
-          <span role="cell" class="forever" data-i18n="models.forever">Forever</span>
-          <span role="cell" data-i18n="models.open">Open or bounded</span>
-          <span role="cell" data-i18n="models.open">Open or bounded</span>
-        </div>
-        <div class="model-row" role="row">
-          <strong role="cell" data-i18n="models.maintenanceModel">Perpetual + maintenance</strong>
-          <span role="cell" class="forever" data-i18n="models.forever">Forever</span>
-          <span role="cell" data-i18n="models.maintenance">Maintenance window</span>
-          <span role="cell" data-i18n="models.open">Open or bounded</span>
-        </div>
-        <div class="model-row" role="row">
-          <strong role="cell" data-i18n="models.featureModel">Perpetual + feature window</strong>
-          <span role="cell" class="forever" data-i18n="models.forever">Forever</span>
-          <span role="cell" data-i18n="models.open">Open or bounded</span>
-          <span role="cell" data-i18n="models.featureWindow">Feature window</span>
-        </div>
-        <div class="model-row" role="row">
-          <strong role="cell" data-i18n="models.subscription">Subscription</strong>
-          <span role="cell" data-i18n="models.untilEnd">Until term end</span>
-          <span role="cell" data-i18n="models.policy">By policy</span>
-          <span role="cell" data-i18n="models.policy">By policy</span>
-        </div>
-        <div class="model-row" role="row">
-          <strong role="cell" data-i18n="models.trial">Trial</strong>
-          <span role="cell" data-i18n="models.untilTrial">Until trial end</span>
-          <span role="cell" data-i18n="models.policy">By policy</span>
-          <span role="cell" data-i18n="models.policy">By policy</span>
-        </div>
-      </div>
-      <p class="model-note" data-i18n="models.note">Teams, named seats, devices, concurrent seats, bundles, editions, add-ons, and scalar capabilities remain separate claims — no overloaded “license count.”</p>
-    </section>
+        <!-- Why -->
+        <section id="why" class="kit-section">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="why.eyebrow">缺失的产品层</span>
+                <h2 class="kit-h2" data-i18n="why.title">付款，不等于权限。</h2>
+                <div class="kit-prose why-prose">
+                    <p data-i18n="why.p1">支付事件只能证明钱已到账，账号只能证明用户身份。它们都不能给已安装的应用一个长期、可携带的答案：“这个用户现在可以运行什么？”</p>
+                    <p data-i18n="why.p2">Permit 把答案变成签名制品。应用用已经信任的公钥在本地验证；Commerce 或其他明确的签发服务可以签发或刷新凭证，但授权判断不依赖服务此刻是否在线。</p>
+                </div>
+            </div>
+        </section>
 
-    <section id="protocol" class="section protocol">
-      <div class="section-heading">
-        <p class="eyebrow" data-i18n="protocol.eyebrow">SMALL CORE, EXPLICIT LAYERS</p>
-        <h2 data-i18n="protocol.title">Verify first. Interpret second.</h2>
-      </div>
-      <div class="protocol-flow">
-        <article>
-          <span class="step-number">1</span>
-          <h3 data-i18n="protocol.one.title">Envelope</h3>
-          <p data-i18n="protocol.one.body">Decode the payload and signature. Reject unknown protocol versions and algorithms.</p>
-        </article>
-        <span class="flow-arrow" aria-hidden="true">→</span>
-        <article>
-          <span class="step-number">2</span>
-          <h3 data-i18n="protocol.two.title">Trust</h3>
-          <p data-i18n="protocol.two.body">Resolve key_id through next, active, retired, or revoked trust-store state.</p>
-        </article>
-        <span class="flow-arrow" aria-hidden="true">→</span>
-        <article>
-          <span class="step-number">3</span>
-          <h3 data-i18n="protocol.three.title">Signature</h3>
-          <p data-i18n="protocol.three.body">Verify Ed25519 over the exact payload bytes before claims are used.</p>
-        </article>
-        <span class="flow-arrow" aria-hidden="true">→</span>
-        <article>
-          <span class="step-number">4</span>
-          <h3 data-i18n="protocol.four.title">Policy</h3>
-          <p data-i18n="protocol.four.body">Evaluate product, version, time windows, grants, installation, and optional lease.</p>
-        </article>
-      </div>
-      <div class="layer-stack">
-        <div class="layer entitlement">
-          <div><span>ENTITLEMENT</span><strong data-i18n="layers.entitlement">Durable commercial right</strong></div>
-          <code>product · edition · grants · seats</code>
-        </div>
-        <div class="layer activation">
-          <div><span>ACTIVATION</span><strong data-i18n="layers.activation">Optional installation lease</strong></div>
-          <code>installation_id · expires_at · grace</code>
-        </div>
-        <div class="layer trial">
-          <div><span>TRIAL</span><strong data-i18n="layers.trial">Independent evaluation right</strong></div>
-          <code>subject · limits · use_expires_at</code>
-        </div>
-      </div>
-    </section>
+        <!-- Principles -->
+        <section class="kit-section kit-section--alt" id="principles" aria-label="Permit principles">
+            <div class="kit-container">
+                <div class="kit-grid kit-grid--3">
+                    <div class="kit-card">
+                        <span class="kit-card-icon principle-index">01</span>
+                        <h3 data-i18n="principle.one.title">精确字节，没有歧义</h3>
+                        <p data-i18n="principle.one.body">Ed25519 对解码后的 payload 字节做精确签名。验证端绝不先解析 JSON、重新序列化，再验签。</p>
+                    </div>
+                    <div class="kit-card">
+                        <span class="kit-card-icon principle-index">02</span>
+                        <h3 data-i18n="principle.two.title">权益不随网络消失</h3>
+                        <p data-i18n="principle.two.body">长期 entitlement 可以独立成立；只有当产品策略需要在线控制时，才叠加短期 activation lease。</p>
+                    </div>
+                    <div class="kit-card">
+                        <span class="kit-card-icon principle-index">03</span>
+                        <h3 data-i18n="principle.three.title">商业策略不锁进平台</h3>
+                        <p data-i18n="principle.three.body">Permit 可以与 Rivet、Glaze、原生应用或其他运行时并列使用；应用框架不拥有商业授权策略。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <section class="section rotation">
-      <div class="section-heading">
-        <p class="eyebrow" data-i18n="rotation.eyebrow">KEY ROTATION WITHOUT A FLAG DAY</p>
-        <h2 data-i18n="rotation.title">Ship tomorrow's trust before you need it.</h2>
-      </div>
-      <div class="key-timeline" aria-label="Trust store key states">
-        <div><span class="key-dot next"></span><b>next</b><small data-i18n="rotation.next">staged in clients</small></div>
-        <div><span class="key-dot active"></span><b>active</b><small data-i18n="rotation.active">signing now</small></div>
-        <div><span class="key-dot retired"></span><b>retired</b><small data-i18n="rotation.retired">historical cutoff</small></div>
-        <div><span class="key-dot revoked"></span><b>revoked</b><small data-i18n="rotation.revoked">rejected immediately</small></div>
-      </div>
-    </section>
+        <!-- Models -->
+        <section id="models" class="kit-section">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="models.eyebrow">一套词汇，三种独立时间窗</span>
+                <h2 class="kit-h2" data-i18n="models.title">表达你真正售卖的产品。</h2>
+                <p class="kit-lead" data-i18n="models.lede">使用权、更新资格和新发布功能的访问权，是三件互相独立的事实。</p>
+                <div class="model-table" role="table" aria-label="Supported commercial models">
+                    <div class="model-row model-header" role="row">
+                        <span role="columnheader" data-i18n="models.model">模型</span>
+                        <span role="columnheader" data-i18n="models.use">使用</span>
+                        <span role="columnheader" data-i18n="models.updates">更新</span>
+                        <span role="columnheader" data-i18n="models.features">新功能</span>
+                    </div>
+                    <div class="model-row" role="row">
+                        <strong role="cell" data-i18n="models.perpetual">永久买断</strong>
+                        <span role="cell" class="forever" data-i18n="models.forever">永久</span>
+                        <span role="cell" data-i18n="models.open">不限或限定</span>
+                        <span role="cell" data-i18n="models.open">不限或限定</span>
+                    </div>
+                    <div class="model-row" role="row">
+                        <strong role="cell" data-i18n="models.maintenanceModel">永久使用 + 更新维护期</strong>
+                        <span role="cell" class="forever" data-i18n="models.forever">永久</span>
+                        <span role="cell" data-i18n="models.maintenance">维护期</span>
+                        <span role="cell" data-i18n="models.open">不限或限定</span>
+                    </div>
+                    <div class="model-row" role="row">
+                        <strong role="cell" data-i18n="models.featureModel">永久使用 + 新功能窗口</strong>
+                        <span role="cell" class="forever" data-i18n="models.forever">永久</span>
+                        <span role="cell" data-i18n="models.open">不限或限定</span>
+                        <span role="cell" data-i18n="models.featureWindow">新功能窗口</span>
+                    </div>
+                    <div class="model-row" role="row">
+                        <strong role="cell" data-i18n="models.subscription">订阅</strong>
+                        <span role="cell" data-i18n="models.untilEnd">到订阅结束</span>
+                        <span role="cell" data-i18n="models.policy">按策略</span>
+                        <span role="cell" data-i18n="models.policy">按策略</span>
+                    </div>
+                    <div class="model-row" role="row">
+                        <strong role="cell" data-i18n="models.trial">试用</strong>
+                        <span role="cell" data-i18n="models.untilTrial">到试用结束</span>
+                        <span role="cell" data-i18n="models.policy">按策略</span>
+                        <span role="cell" data-i18n="models.policy">按策略</span>
+                    </div>
+                </div>
+                <p class="model-note" data-i18n="models.note">团队、实名席位、设备、并发席位、套餐、版本、附加项和标量能力分别表达——没有含义过载的“许可证数量”。</p>
+            </div>
+        </section>
 
-    <section id="start" class="section start">
-      <div>
-        <p class="eyebrow" data-i18n="start.eyebrow">RACKET REFERENCE IMPLEMENTATION</p>
-        <h2 data-i18n="start.title">From zero to verified.</h2>
-        <p data-i18n="start.lede">Install the package, generate a key pair, sign a payload, then verify it with only the public trust store.</p>
-        <a class="text-link" href="https://github.com/turlamai/permit" data-i18n="start.source">Browse source and test vectors →</a>
-      </div>
-      <div class="terminal" aria-label="Permit command line example">
-        <div class="terminal-bar"><i></i><i></i><i></i><span>permit — shell</span></div>
-        <pre><code><span class="prompt">$</span> raco pkg install --auto \
+        <!-- Protocol -->
+        <section id="protocol" class="kit-section kit-section--alt">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="protocol.eyebrow">核心很小，层级明确</span>
+                <h2 class="kit-h2" data-i18n="protocol.title">先验证，再解释。</h2>
+                <div class="protocol-flow">
+                    <article>
+                        <span class="step-number">1</span>
+                        <h3 data-i18n="protocol.one.title">信封</h3>
+                        <p data-i18n="protocol.one.body">解码 payload 和签名；拒绝未知协议版本和算法。</p>
+                    </article>
+                    <span class="flow-arrow" aria-hidden="true">→</span>
+                    <article>
+                        <span class="step-number">2</span>
+                        <h3 data-i18n="protocol.two.title">信任</h3>
+                        <p data-i18n="protocol.two.body">通过 key_id 解析 next、active、retired 或 revoked 状态。</p>
+                    </article>
+                    <span class="flow-arrow" aria-hidden="true">→</span>
+                    <article>
+                        <span class="step-number">3</span>
+                        <h3 data-i18n="protocol.three.title">签名</h3>
+                        <p data-i18n="protocol.three.body">在使用任何声明之前，对精确 payload 字节完成 Ed25519 验证。</p>
+                    </article>
+                    <span class="flow-arrow" aria-hidden="true">→</span>
+                    <article>
+                        <span class="step-number">4</span>
+                        <h3 data-i18n="protocol.four.title">策略</h3>
+                        <p data-i18n="protocol.four.body">判断产品、版本、时间窗、授权项、安装实例和可选租约。</p>
+                    </article>
+                </div>
+                <div class="layer-stack">
+                    <div class="layer entitlement">
+                        <div><span>ENTITLEMENT</span><strong data-i18n="layers.entitlement">长期商业权益</strong></div>
+                        <code>product · edition · grants · seats</code>
+                    </div>
+                    <div class="layer activation">
+                        <div><span>ACTIVATION</span><strong data-i18n="layers.activation">可选的安装租约</strong></div>
+                        <code>installation_id · expires_at · grace</code>
+                    </div>
+                    <div class="layer trial">
+                        <div><span>TRIAL</span><strong data-i18n="layers.trial">独立的试用权益</strong></div>
+                        <code>subject · limits · use_expires_at</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key rotation -->
+        <section class="kit-section" id="rotation">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="rotation.eyebrow">无需停机切换的密钥轮换</span>
+                <h2 class="kit-h2" data-i18n="rotation.title">在需要之前，先把明天的信任发出去。</h2>
+                <div class="key-timeline" aria-label="Trust store key states">
+                    <div><span class="key-dot next" aria-hidden="true"></span><b>next</b><small data-i18n="rotation.next">已预置到客户端</small></div>
+                    <div><span class="key-dot active" aria-hidden="true"></span><b>active</b><small data-i18n="rotation.active">当前签发</small></div>
+                    <div><span class="key-dot retired" aria-hidden="true"></span><b>retired</b><small data-i18n="rotation.retired">保留历史截止线</small></div>
+                    <div><span class="key-dot revoked" aria-hidden="true"></span><b>revoked</b><small data-i18n="rotation.revoked">立即拒绝</small></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick start -->
+        <section id="start" class="kit-section kit-section--alt">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="start.eyebrow">RACKET 参考实现</span>
+                <h2 class="kit-h2" data-i18n="start.title">从零到验证通过。</h2>
+                <p class="kit-lead" data-i18n="start.lede">安装包、生成密钥对、签一个 payload，再只用公开信任库完成验证。</p>
+                <div class="terminal" aria-label="Permit command line example">
+                    <div class="terminal-bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span>permit — shell</span></div>
+                    <pre><code><span class="prompt">$</span> raco pkg install --auto \
   --name permit https://github.com/turlamai/permit.git
 
 <span class="prompt">$</span> raco permit keygen \
@@ -250,30 +298,185 @@ html:lang(en) .reader-zh,html:lang(zh) .reader-en{display:none!important}@media(
   --credential entitlement.permit.json
 
 <span class="ok">✓ verified entitlement</span></code></pre>
-      </div>
-    </section>
+                </div>
+                <p class="start-source"><a class="text-link" href="https://github.com/turlamai/permit" data-i18n="start.source">查看源码与测试向量 →</a></p>
+            </div>
+        </section>
 
-    <section class="boundary">
-      <div>
-        <p class="eyebrow" data-i18n="boundary.eyebrow">A DELIBERATE BOUNDARY</p>
-        <h2 data-i18n="boundary.title">A protocol, not a billing company.</h2>
-      </div>
-      <p data-i18n="boundary.body">Permit v0.1 does not implement payments, accounts, pricing, tax, email, dashboards, hosted metering, or a license server. Commerce owns the family payment-to-rights workflow and may issue credentials through the explicit issuer boundary; it does not belong in the verification core.</p>
-    </section>
-  <section id="adoption" class="product-start"><h2 class="reader-en " lang="en">Build one verifiable result.</h2><h2 class="reader-zh " lang="zh">先完成一个可验证的结果。</h2><p class="reader-en " lang="en">Compose Permit beside an application when signed, offline-verifiable rights are needed. Start with an entitlement and omit activation unless the product explicitly needs an online lease. Free products do not need a licensing subsystem.</p><p class="reader-zh " lang="zh">需要签名且可离线验证的权益时，在应用旁组合 Permit。从 entitlement 开始；只有产品明确需要在线租约时才增加 activation。免费产品不需要授权子系统。</p><p class="reader-en " lang="en">The Racket implementation requires the runtime and crypto dependencies declared by the package. Protocol v1 is implemented, but a stable 1.0 compatibility promise has not been declared. Independent verifiers must execute the normative vectors.</p><p class="reader-zh " lang="zh">Racket 实现需要包声明的运行时与加密依赖。Protocol v1 已实现，但尚未宣布稳定 1.0 兼容承诺。独立验证器必须执行权威测试向量。</p><p class="reader-en " lang="en">Keep issuer private keys server-side and public trust stores in clients. Verify first, then evaluate product/time/feature policy. Revisions replace snapshots the client has received; they do not revoke an offline credential immediately. Preserve backup/rotation paths for perpetual rights and separate entitlement keys from update/publisher keys.</p><p class="reader-zh " lang="zh">签发私钥留在签发端，客户端仅持公钥信任库。先验签，再判断产品、时间和功能政策。revision 替换客户端已收到的快照，不会立即撤销离线凭据。为永久权益保留备份和轮换路径，权益密钥与更新、发行者密钥分离。</p><div class="start-links"><a class="reader-en" lang="en" href="https://github.com/turlamai/permit/blob/main/docs/USING.md">Getting started, compatibility &amp; support</a><a class="reader-zh" lang="zh" href="https://github.com/turlamai/permit/blob/main/docs/USING.zh-CN.md">入门、兼容与支持</a></div></section>
-</main>
+        <!-- Boundary -->
+        <section class="kit-section" id="boundary">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="boundary.eyebrow">有意保留的边界</span>
+                <h2 class="kit-h2" data-i18n="boundary.title">它是协议，不是账单公司。</h2>
+                <div class="kit-prose boundary-prose">
+                    <p data-i18n="boundary.body">Permit v0.1 不实现支付、账号、定价、税务、邮件、管理后台、托管计量或许可证服务器。家族内从支付到权益的流程由 Commerce 负责，并通过显式 issuer 边界签发凭证；它不进入验证核心。</p>
+                </div>
+            </div>
+        </section>
 
-  <footer>
-    <div class="footer-brand"><span class="brand-mark" aria-hidden="true">P</span><b>Permit</b></div>
-    <p data-i18n="footer.tagline">Signed product rights for independent software.</p>
-    <div class="footer-links">
-      <a href="https://github.com/turlamai/permit">GitHub</a>
-      <a href="https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md">Protocol v1</a>
-      <a href="https://github.com/turlamai/permit/blob/main/SECURITY.md">Security</a>
-      <a href="https://github.com/turlamai/permit/blob/main/LICENSE">Apache-2.0</a>
-    </div>
-  </footer>
+        <!-- Adoption -->
+        <section class="kit-section kit-section--alt" id="adoption">
+            <div class="kit-container">
+                <span class="kit-kicker" data-i18n="adoption.kicker">选型判断</span>
+                <h2 class="kit-h2" data-i18n="adoption.title">先完成一个可验证的结果。</h2>
+                <div class="kit-prose adoption-prose">
+                    <p data-i18n="adoption.p1">需要签名且可离线验证的权益时，在应用旁组合 Permit。从 entitlement 开始；只有产品明确需要在线租约时才增加 activation。免费产品不需要授权子系统。</p>
+                    <p data-i18n="adoption.p2">Racket 实现需要包声明的运行时与加密依赖。Protocol v1 已实现，但尚未宣布稳定 1.0 兼容承诺。独立验证器必须执行权威测试向量。</p>
+                    <p data-i18n="adoption.p3">签发私钥留在签发端，客户端仅持公钥信任库。先验签，再判断产品、时间和功能政策。revision 替换客户端已收到的快照，不会立即撤销离线凭据。为永久权益保留备份和轮换路径，权益密钥与更新、发行者密钥分离。</p>
+                    <p class="start-links"><a href="https://github.com/turlamai/permit/blob/main/docs/USING.md" data-zh-href="https://github.com/turlamai/permit/blob/main/docs/USING.zh-CN.md" data-en-href="https://github.com/turlamai/permit/blob/main/docs/USING.md" data-i18n="adoption.link">入门、兼容与支持</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
 
-  <script src="site.js"></script>
+    <footer class="kit-footer">
+        <div class="kit-container">
+            <div class="kit-footer-grid">
+                <div>
+                    <a class="kit-brand" href="#top">
+                        <svg class="kit-brand-mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="#D97757"/><path fill="#FFFFFF" d="M20 14h17c9.4 0 15 5.2 15 13.6 0 8.6-5.8 13.9-15.3 13.9h-6.2V51H20V14Zm10.5 8.8v10h5.3c3.9 0 5.9-1.7 5.9-5s-2-5-5.9-5h-5.3Z"/></svg>
+                        <span>Permit</span>
+                    </a>
+                    <p class="kit-footer-tagline" data-i18n="footer.tagline">给独立软件的签名产品权益。</p>
+                </div>
+                <div>
+                    <h4 data-i18n="footer.product">产品</h4>
+                    <ul>
+                        <li><a href="#why" data-i18n="nav.why">为什么</a></li>
+                        <li><a href="#models" data-i18n="nav.models">产品模型</a></li>
+                        <li><a href="#protocol" data-i18n="nav.protocol">协议</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 data-i18n="footer.family">家族</h4>
+                    <ul>
+                        <li><a href="https://jrtx.site/" data-i18n="footer.portal">全部产品</a></li>
+                        <li><a href="https://rivet.jrtx.site/">Rivet</a></li>
+                        <li><a href="https://glaze.jrtx.site/">Glaze</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 data-i18n="footer.legal">条款</h4>
+                    <ul>
+                        <li><a href="https://github.com/turlamai/permit">GitHub</a></li>
+                        <li><a href="https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md">Protocol v1</a></li>
+                        <li><a href="https://github.com/turlamai/permit/blob/main/SECURITY.md">Security</a></li>
+                        <li><a href="https://github.com/turlamai/permit/blob/main/LICENSE">Apache-2.0</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="kit-footer-bottom">
+                <span data-i18n="footer.copyright">© 2026 TuringLambda AI · Apache-2.0 · 离线优先，隐私默认。</span>
+                <span class="kit-mono">site-kit v1.0.2</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Dictionaries: zh canonical, en complete. -->
+    <script type="application/json" id="kit-i18n">
+    {
+        "__meta__": {
+            "zh": { "title": "Permit — 签名的产品权益", "description": "离线可验证、在线可管理的签名产品权益。开放协议与 Racket 参考实现。" },
+            "en": { "title": "Permit — Signed product rights", "description": "Offline-verifiable, online-manageable signed product entitlements. An open protocol and Racket reference implementation." }
+        },
+        "zh": {
+            "nav.why": "为什么", "nav.models": "产品模型", "nav.protocol": "协议", "nav.start": "快速开始", "nav.github": "GitHub",
+            "hero.eyebrow": "Protocol v1 · Ed25519 · Apache-2.0",
+            "hero.h1": "签一次，", "hero.h1-accent": "到处都能验。",
+            "hero.lede": "Permit 给独立软件一套小而开放的产品权益格式：离线可验证，需要时也能在线管理。",
+            "hero.start": "快速开始", "hero.spec": "阅读 Protocol v1",
+            "proof.offline": "离线可验证", "proof.online": "在线可管理", "proof.framework": "与框架无关",
+            "credential.label": "签名凭证", "credential.verified": "已验证", "credential.public": "公开信任", "credential.payload": "精确 payload",
+            "why.eyebrow": "缺失的产品层", "why.title": "付款，不等于权限。",
+            "why.p1": "支付事件只能证明钱已到账，账号只能证明用户身份。它们都不能给已安装的应用一个长期、可携带的答案：“这个用户现在可以运行什么？”",
+            "why.p2": "Permit 把答案变成签名制品。应用用已经信任的公钥在本地验证；Commerce 或其他明确的签发服务可以签发或刷新凭证，但授权判断不依赖服务此刻是否在线。",
+            "principle.one.title": "精确字节，没有歧义",
+            "principle.one.body": "Ed25519 对解码后的 payload 字节做精确签名。验证端绝不先解析 JSON、重新序列化，再验签。",
+            "principle.two.title": "权益不随网络消失",
+            "principle.two.body": "长期 entitlement 可以独立成立；只有当产品策略需要在线控制时，才叠加短期 activation lease。",
+            "principle.three.title": "商业策略不锁进平台",
+            "principle.three.body": "Permit 可以与 Rivet、Glaze、原生应用或其他运行时并列使用；应用框架不拥有商业授权策略。",
+            "models.eyebrow": "一套词汇，三种独立时间窗", "models.title": "表达你真正售卖的产品。",
+            "models.lede": "使用权、更新资格和新发布功能的访问权，是三件互相独立的事实。",
+            "models.model": "模型", "models.use": "使用", "models.updates": "更新", "models.features": "新功能",
+            "models.perpetual": "永久买断", "models.forever": "永久", "models.open": "不限或限定",
+            "models.maintenanceModel": "永久使用 + 更新维护期", "models.featureModel": "永久使用 + 新功能窗口",
+            "models.maintenance": "维护期", "models.featureWindow": "新功能窗口",
+            "models.subscription": "订阅", "models.untilEnd": "到订阅结束", "models.policy": "按策略",
+            "models.trial": "试用", "models.untilTrial": "到试用结束",
+            "models.note": "团队、实名席位、设备、并发席位、套餐、版本、附加项和标量能力分别表达——没有含义过载的“许可证数量”。",
+            "protocol.eyebrow": "核心很小，层级明确", "protocol.title": "先验证，再解释。",
+            "protocol.one.title": "信封", "protocol.one.body": "解码 payload 和签名；拒绝未知协议版本和算法。",
+            "protocol.two.title": "信任", "protocol.two.body": "通过 key_id 解析 next、active、retired 或 revoked 状态。",
+            "protocol.three.title": "签名", "protocol.three.body": "在使用任何声明之前，对精确 payload 字节完成 Ed25519 验证。",
+            "protocol.four.title": "策略", "protocol.four.body": "判断产品、版本、时间窗、授权项、安装实例和可选租约。",
+            "layers.entitlement": "长期商业权益", "layers.activation": "可选的安装租约", "layers.trial": "独立的试用权益",
+            "rotation.eyebrow": "无需停机切换的密钥轮换", "rotation.title": "在需要之前，先把明天的信任发出去。",
+            "rotation.next": "已预置到客户端", "rotation.active": "当前签发", "rotation.retired": "保留历史截止线", "rotation.revoked": "立即拒绝",
+            "start.eyebrow": "RACKET 参考实现", "start.title": "从零到验证通过。",
+            "start.lede": "安装包、生成密钥对、签一个 payload，再只用公开信任库完成验证。",
+            "start.source": "查看源码与测试向量 →",
+            "boundary.eyebrow": "有意保留的边界", "boundary.title": "它是协议，不是账单公司。",
+            "boundary.body": "Permit v0.1 不实现支付、账号、定价、税务、邮件、管理后台、托管计量或许可证服务器。家族内从支付到权益的流程由 Commerce 负责，并通过显式 issuer 边界签发凭证；它不进入验证核心。",
+            "adoption.kicker": "选型判断", "adoption.title": "先完成一个可验证的结果。",
+            "adoption.p1": "需要签名且可离线验证的权益时，在应用旁组合 Permit。从 entitlement 开始；只有产品明确需要在线租约时才增加 activation。免费产品不需要授权子系统。",
+            "adoption.p2": "Racket 实现需要包声明的运行时与加密依赖。Protocol v1 已实现，但尚未宣布稳定 1.0 兼容承诺。独立验证器必须执行权威测试向量。",
+            "adoption.p3": "签发私钥留在签发端，客户端仅持公钥信任库。先验签，再判断产品、时间和功能政策。revision 替换客户端已收到的快照，不会立即撤销离线凭据。为永久权益保留备份和轮换路径，权益密钥与更新、发行者密钥分离。",
+            "adoption.link": "入门、兼容与支持",
+            "footer.tagline": "给独立软件的签名产品权益。",
+            "footer.product": "产品", "footer.family": "家族", "footer.legal": "条款", "footer.portal": "全部产品",
+            "footer.copyright": "© 2026 TuringLambda AI · Apache-2.0 · 离线优先，隐私默认。"
+        },
+        "en": {
+            "nav.why": "Why", "nav.models": "Models", "nav.protocol": "Protocol", "nav.start": "Quick start", "nav.github": "GitHub",
+            "hero.eyebrow": "Protocol v1 · Ed25519 · Apache-2.0",
+            "hero.h1": "Sign once.", "hero.h1-accent": "Authorize anywhere.",
+            "hero.lede": "Permit gives independent software a small, open format for product rights that work offline and stay manageable online.",
+            "hero.start": "Get started", "hero.spec": "Read Protocol v1",
+            "proof.offline": "Offline-verifiable", "proof.online": "Online-manageable", "proof.framework": "Framework-neutral",
+            "credential.label": "SIGNED CREDENTIAL", "credential.verified": "verified", "credential.public": "public trust", "credential.payload": "exact payload",
+            "why.eyebrow": "THE MISSING PRODUCT LAYER", "why.title": "Payments are not permissions.",
+            "why.p1": "A payment event proves that money moved. An account proves identity. Neither gives an installed app a durable, portable answer to \u201cwhat may this user run right now?\u201d",
+            "why.p2": "Permit turns that answer into a signed artifact. The application verifies it locally with public keys it already trusts. Commerce or another explicit issuer service may issue or refresh credentials, but authorization never depends on that service being reachable.",
+            "principle.one.title": "Exact bytes, no ambiguity",
+            "principle.one.body": "Ed25519 signs the decoded payload bytes exactly. Verifiers never parse and re-serialize JSON before checking the signature.",
+            "principle.two.title": "Rights outlive connectivity",
+            "principle.two.body": "Long-lived entitlements stand on their own. Products add short-lived activation leases only when their policy needs online control.",
+            "principle.three.title": "Policy without platform lock-in",
+            "principle.three.body": "Permit sits beside Rivet, Glaze, native apps, or any other runtime. The application framework never owns commercial policy.",
+            "models.eyebrow": "ONE VOCABULARY, DISTINCT WINDOWS", "models.title": "Model the product you actually sell.",
+            "models.lede": "Use rights, update eligibility, and access to newly published features are independent facts.",
+            "models.model": "Model", "models.use": "Use", "models.updates": "Updates", "models.features": "New features",
+            "models.perpetual": "Perpetual purchase", "models.forever": "Forever", "models.open": "Open or bounded",
+            "models.maintenanceModel": "Perpetual + maintenance", "models.featureModel": "Perpetual + feature window",
+            "models.maintenance": "Maintenance window", "models.featureWindow": "Feature window",
+            "models.subscription": "Subscription", "models.untilEnd": "Until term end", "models.policy": "By policy",
+            "models.trial": "Trial", "models.untilTrial": "Until trial end",
+            "models.note": "Teams, named seats, devices, concurrent seats, bundles, editions, add-ons, and scalar capabilities remain separate claims — no overloaded \u201clicense count.\u201d",
+            "protocol.eyebrow": "SMALL CORE, EXPLICIT LAYERS", "protocol.title": "Verify first. Interpret second.",
+            "protocol.one.title": "Envelope", "protocol.one.body": "Decode the payload and signature. Reject unknown protocol versions and algorithms.",
+            "protocol.two.title": "Trust", "protocol.two.body": "Resolve key_id through next, active, retired, or revoked trust-store state.",
+            "protocol.three.title": "Signature", "protocol.three.body": "Verify Ed25519 over the exact payload bytes before claims are used.",
+            "protocol.four.title": "Policy", "protocol.four.body": "Evaluate product, version, time windows, grants, installation, and optional lease.",
+            "layers.entitlement": "Durable commercial right", "layers.activation": "Optional installation lease", "layers.trial": "Independent evaluation right",
+            "rotation.eyebrow": "KEY ROTATION WITHOUT A FLAG DAY", "rotation.title": "Ship tomorrow's trust before you need it.",
+            "rotation.next": "staged in clients", "rotation.active": "signing now", "rotation.retired": "historical cutoff", "rotation.revoked": "rejected immediately",
+            "start.eyebrow": "RACKET REFERENCE IMPLEMENTATION", "start.title": "From zero to verified.",
+            "start.lede": "Install the package, generate a key pair, sign a payload, then verify it with only the public trust store.",
+            "start.source": "Browse source and test vectors →",
+            "boundary.eyebrow": "A DELIBERATE BOUNDARY", "boundary.title": "A protocol, not a billing company.",
+            "boundary.body": "Permit v0.1 does not implement payments, accounts, pricing, tax, email, dashboards, hosted metering, or a license server. Commerce owns the family payment-to-rights workflow and may issue credentials through the explicit issuer boundary; it does not belong in the verification core.",
+            "adoption.kicker": "Choosing", "adoption.title": "Build one verifiable result.",
+            "adoption.p1": "Compose Permit beside an application when signed, offline-verifiable rights are needed. Start with an entitlement and omit activation unless the product explicitly needs an online lease. Free products do not need a licensing subsystem.",
+            "adoption.p2": "The Racket implementation requires the runtime and crypto dependencies declared by the package. Protocol v1 is implemented, but a stable 1.0 compatibility promise has not been declared. Independent verifiers must execute the normative vectors.",
+            "adoption.p3": "Keep issuer private keys server-side and public trust stores in clients. Verify first, then evaluate product/time/feature policy. Revisions replace snapshots the client has received; they do not revoke an offline credential immediately. Preserve backup/rotation paths for perpetual rights and separate entitlement keys from update/publisher keys.",
+            "adoption.link": "Getting started, compatibility & support",
+            "footer.tagline": "Signed product rights for independent software.",
+            "footer.product": "Product", "footer.family": "Family", "footer.legal": "Legal", "footer.portal": "All products",
+            "footer.copyright": "© 2026 TuringLambda AI · Apache-2.0 · Offline-first, private by default."
+        }
+    }
+    </script>
 </body>
+
 </html>
