@@ -51,6 +51,8 @@
 ;; Cross-repository onboarding, release evidence and trust-boundary links
 ;; must not point to the retired repository owner. Historical changelog
 ;; entries may retain history; current normative entry points may not.
+;; Scribble manuals are public entry points too and were missed once; the
+;; markdown gate therefore extends to every committed .scrbl file.
 (for ([entry '("CONTRIBUTING.md"
                "ROADMAP.md"
                "docs/architecture.md"
@@ -60,3 +62,22 @@
    (string-contains? (file->string (build-path repository-root entry))
                      "https://github.com/turinglambdaai/")
    (format "~a must use the current GitHub owner" entry)))
+
+(define (scrbl-file? path)
+  (and (file-exists? path)
+       (equal? (path-get-extension path) #".scrbl")))
+
+(define scrbl-files
+  (append
+   (filter scrbl-file? (directory-list repository-root #:build? #t))
+   (append-map
+    (lambda (directory)
+      (find-files scrbl-file? (build-path repository-root directory)))
+    '("permit" "permit-doc" "permit-test" "examples" "conformance"))))
+
+(for ([document (in-list scrbl-files)])
+  (check-false
+   (string-contains? (file->string document)
+                     "https://github.com/turinglambdaai/")
+   (format "~a must use the current GitHub owner"
+           (find-relative-path repository-root document))))

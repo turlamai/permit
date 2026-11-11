@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+All notable changes to Permit are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/), and
+this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
 
 ### Added
 
@@ -30,9 +35,6 @@
   `current-ed25519-backend` pins `'auto`, `'native`, or `'pure` for diagnostics
   and tests.
 
-
-### Added
-
 - Add cross-language conformance cases for raw control characters in JSON
   strings. The corpus now distinguishes `json-structural-reject` (malformed
   JSON: duplicate members, raw U+0000..U+001F, invalid escapes, trailing
@@ -47,6 +49,21 @@
   responsibilities. This does not claim complete product or official package
   builder acceptance.
 
+- Document `permit/adapter` in the Scribble manual as its own Host adapter
+  section, and list `sign` and `doctor` in the manual's command-line
+  reference so the manual matches the CLI surface.
+
+- Add a documentation map (`docs/README.md`) that routes every canonical
+  protocol, boundary, operations, and evidence document, with a source
+  entry-point table.
+
+### Changed
+
+- Bind `@racket` references in the Scribble manual through `for-label`
+  requires so public contracts hyperlink to their definitions.
+
+- Align the package `info.rkt` version to `0.2.0`, matching the `v0.2.0`
+  tag and this changelog.
 
 ### Fixed
 
@@ -85,7 +102,20 @@
   followed by garbage, closing L1 from the October security review without
   changing Protocol v1.
 
-## 0.2.0 - 2026-10-21
+- Replace the READMEs' local-trial example call to the nonexistent
+  `save-local-state!` with `write-local-trial` on the updated evaluation
+  state, in both languages.
+
+- Sync the Chinese README's cryptographic runtime requirements with the
+  current behavior (pure-Racket `ed25519` fallback and `raco permit
+  doctor`) and with the English wording, and drop "v0.1" version phrasing
+  that conflated the package version with Protocol v1 in both languages.
+
+- Guard every committed `.scrbl` file against the retired
+  `turinglambdaai` GitHub owner in the documentation-link test; four
+  manual hyperlinks still pointed there.
+
+## [0.2.0] - 2026-10-21
 
 ### Fixed
 
@@ -177,11 +207,7 @@
 - Add privacy-preserving random installation/trial identifiers.
 - Add a storage-agnostic local trial state machine with clock high-water tracking and signed trial-extension support.
 
-### Security
-
-- Seal the `verified-credential` constructor so product policy can only receive credentials produced by signature verification.
-
-### Protocol v1 hardening
+### Changed
 
 - Separate logical `entitlement_id` from unique signed `credential_id` and add monotonic revisions.
 - Bind activation leases to an exact entitlement id, revision, credential id, and installation id.
@@ -189,9 +215,6 @@
 - Make key validity windows constrain authenticated issuance time so retired keys do not expire perpetual rights.
 - Harden SemVer, Base64, recursive duplicate-key JSON rejection, trust-store aliases, per-key credential purposes, scalar capability conflicts, and strict JSON parsing.
 - Add explicit vs published-through feature grant modes, add-on and standard-limit policy queries, plus split normative protocol documentation.
-
-### Release evidence
-
 - Racket reference: 366 tests green on macOS arm64 (Apple Silicon) with
   Racket 9.3 (CS); CI runs the same suite on Racket 9.0 and 9.3 across
   Linux, Windows, and macOS, and regenerates the vector corpus with a
@@ -206,7 +229,13 @@
   security review is closed with every finding fixed
   (`docs/security-review-2026-10.md`).
 
-## 0.1.0 - 2026-10-15
+### Security
+
+- Seal the `verified-credential` constructor so product policy can only receive credentials produced by signature verification.
+
+## [0.1.0] - 2026-10-15
+
+### Added
 
 - Define Permit Protocol v1 with exact-payload Ed25519 envelopes.
 - Add entitlement, signed trial, and activation-lease schemas.

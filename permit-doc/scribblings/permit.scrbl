@@ -1,5 +1,11 @@
 #lang scribble/manual
 
+@(require (for-label racket/base
+                     json
+                     permit
+                     permit/issuer
+                     permit/adapter))
+
 @title[#:tag "permit"]{Permit: Signed Product Rights}
 @author[(author+email "Turing Lambda" "jirentianxiang1024@gmail.com")]
 
@@ -17,9 +23,9 @@ change the verification protocol.
 
 Permit is deliberately not anti-tamper DRM, and a permanently offline
 credential cannot learn about a revocation that happened elsewhere —
-see @hyperlink["https://github.com/turinglambdaai/permit/blob/main/docs/threat-model.md"]{the
+see @hyperlink["https://github.com/turlamai/permit/blob/main/docs/threat-model.md"]{the
 threat model} for the honest boundaries. The normative protocol lives in
-@hyperlink["https://github.com/turinglambdaai/permit/blob/main/docs/protocol-v1.md"]{Protocol
+@hyperlink["https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md"]{Protocol
 v1}; this manual documents the Racket surface.
 
 @section{Trust stores}
@@ -124,7 +130,7 @@ carries a reason so a product can tell the customer what was wrong with a
 license file without matching message text. Time outcomes (expiry,
 not-yet-valid, installation mismatch, missing activation) are not refusals;
 they come back from @racket[credential-status] as status reasons. See
-@hyperlink["https://github.com/turinglambdaai/permit/blob/main/docs/decisions/0002-typed-verification-failures.md"]{decision
+@hyperlink["https://github.com/turlamai/permit/blob/main/docs/decisions/0002-typed-verification-failures.md"]{decision
 0002}.
 
 @defstruct*[(exn:fail:permit exn:fail) ([reason symbol?])]{
@@ -305,7 +311,7 @@ those bytes to @racket[issue-credential]. These constructors spell the closed
 entitlement schema so that adapters never do; every field is an explicit
 keyword with a @racket['null] or empty default wherever the schema allows
 one. See
-@hyperlink["https://github.com/turinglambdaai/permit/blob/main/docs/decisions/0001-issuer-rights-snapshots.md"]{decision
+@hyperlink["https://github.com/turlamai/permit/blob/main/docs/decisions/0001-issuer-rights-snapshots.md"]{decision
 0001} for the boundary this layer defines.
 
 @defproc[(subject [#:type type string?]
@@ -409,6 +415,47 @@ window; the key's purposes do not include the credential type; the private
 key does not correspond to the store's public key.
 }
 
+@section{Host adapter}
+
+@defmodule[permit/adapter]
+
+A host UI — SwiftUI, WinUI 3, GTK, or any other native shell — should not
+re-implement verification, status, and feature composition.
+@racket[permit/adapter] evaluates one candidate credential, or no credential
+at all, into one small JSON-shaped result. The result is deliberately free of
+subject identity, claims, raw credential bytes, and trust material, and
+verification failures are a separate field from valid-but-unusable states, so
+a host can distinguish a forged or corrupt import from an expired license
+without parsing messages. The contract between hosts and this module is
+versioned; see
+@hyperlink["https://github.com/turlamai/permit/blob/main/docs/desktop-adapter-v1.md"]{the
+desktop adapter contract}.
+
+@defthing[adapter-contract-version exact-positive-integer?]{The adapter contract version, currently @racket[1].}
+
+@defproc[(adapter-evaluate
+          [#:trust-store store trust-store?]
+          [#:product product string?]
+          [#:at at string?]
+          [#:credential-bytes credential-bytes (or/c bytes? #f) #f]
+          [#:feature feature (or/c string? #f) #f]
+          [#:version version (or/c string? #f) #f]
+          [#:installation-id installation-id (or/c string? #f) #f]
+          [#:activation-bytes activation-bytes (or/c bytes? #f) #f]
+          [#:trial-extension-bytes extension-bytes (listof bytes?) '()])
+         hash?]{
+Returns a JSON-shaped hash carrying @racket['contract_version],
+@racket['product], @racket['at], @racket['state] — one of
+@racket["free"] (no credential), @racket["pro"] (verified and usable),
+@racket["inactive"] (verified but not currently usable), or
+@racket["invalid"] (verification failed) — plus @racket['usable?],
+@racket['reasons], @racket['entitlement_id], @racket['revision],
+@racket['type], and @racket['feature_allowed]. Malformed or forged
+credential bytes never raise: they become @racket["invalid"] with the
+public verification reason. Argument type errors still raise
+@racket[exn:fail:contract].
+}
+
 @section{Command line}
 
 @verbatim|{raco permit keygen --private k.der --public pub.der \
@@ -417,15 +464,21 @@ key does not correspond to the store's public key.
 raco permit issue  --key k.der --key-id license-2027 \
            --trust-store trust.json --payload ent.json \
            --output customer.permit.json
+raco permit sign   --key k.der --payload ent.json \
+           --output customer.permit.json
 raco permit verify --trust-store trust.json \
            --credential customer.permit.json
 raco permit check  --trust-store trust.json \
            --credential customer.permit.json \
            --product example-app --edition pro
-raco permit inspect --credential customer.permit.json}|#
+raco permit inspect --credential customer.permit.json
+raco permit doctor}|#
 
 @tt{inspect} is deliberately labelled unverified; never authorize a
-feature from inspected claims alone.
+feature from inspected claims alone. @tt{sign} is the deliberately
+low-level escape hatch that skips the issuer-side checks of
+@tt{issue}. @tt{doctor} prints the selected Ed25519 backend and
+per-provider availability as JSON.
 
 @section{Local trials and installation identity}
 

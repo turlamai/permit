@@ -101,7 +101,10 @@ jobs:
       - name: Install package
         run: raco pkg install --auto --no-docs --name permit "${{ github.workspace }}"
       - name: Build reference manual
-        run: raco scribble --htmls --dest "${{ runner.temp }}/permit-doc" permit-doc/scribblings/permit.scrbl
+        run: |
+          raco scribble ++xref-in setup/xref load-collections-xref \
+            --htmls --dest "${{ runner.temp }}/permit-doc" permit-doc/scribblings/permit.scrbl
+          test -s "${{ runner.temp }}/permit-doc/permit/index.html"
       - name: Reproduce signed test vectors
         run: racket test-vectors/v1/generate.rkt
       - name: Require byte-for-byte reproducibility

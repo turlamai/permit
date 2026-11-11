@@ -2,7 +2,7 @@
 
 **Signed product rights for independent software — verifiable offline, manageable online when you need it.**
 
-[![CI](https://github.com/turlamai/permit/actions/workflows/ci.yml/badge.svg)](https://github.com/turlamai/permit/actions/workflows/ci.yml) ![Racket](https://img.shields.io/badge/Racket-9F1D20?logo=racket&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) ![Protocol](https://img.shields.io/badge/protocol-v1-C15F3C)
+[![CI](https://github.com/turlamai/permit/actions/workflows/ci.yml/badge.svg)](https://github.com/turlamai/permit/actions/workflows/ci.yml) ![Racket](https://img.shields.io/badge/Racket-9F1D20?logo=racket&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) ![Protocol](https://img.shields.io/badge/protocol-v1-C15F3C) [![Version](https://img.shields.io/github/v/release/turlamai/permit?label=version)](https://github.com/turlamai/permit/releases/latest)
 
 **English** · [中文](README.zh-CN.md)
 
@@ -10,7 +10,7 @@ Permit is a framework-neutral protocol and Racket reference implementation for a
 
 > What may this person, organization, or installation use right now?
 
-Payment providers can tell you that money moved. Account systems can tell you who signed in. Permit turns durable product rights into signed, portable credentials that an application can verify locally with an embedded public trust store — without requiring an account, a network round trip, or a framework-owned licensing subsystem.
+Payment providers can tell you that money moved. Account systems can tell you who signed in. Permit turns durable product rights into signed, portable credentials that an application can verify locally with an embedded public trust store — without requiring an account, a network round trip, or a framework-owned licensing subsystem. The bilingual homepage is [permit.jrtx.site](https://permit.jrtx.site/).
 
 ## Cryptographic runtime requirements
 
@@ -50,7 +50,7 @@ Permit composes beside an application framework:
               runtime / update   product rights
 ```
 
-Rivet and Glaze do not depend on Permit. Update-artifact signing and Permit credential signing also use separate keys and trust policies. See the [framework integration contract](docs/framework-integration.md) for the durable dependency and responsibility boundaries.
+[Rivet](https://github.com/turlamai/rivet) and [Glaze](https://github.com/turlamai/glaze) do not depend on Permit. Update-artifact signing and Permit credential signing also use separate keys and trust policies. See the [framework integration contract](docs/framework-integration.md) for the durable dependency and responsibility boundaries.
 
 Online products may add [Commerce](https://github.com/turlamai/commerce)
 for provider events, commercial projections, issuance workflow, and credential
@@ -75,7 +75,13 @@ Grants may name editions, features, add-ons, bundles, and scalar capabilities. T
 
 New to signed credentials? Follow the [step-by-step getting-started guide](docs/getting-started.md). It explains which files stay private, which files ship with the application, and how verification differs from policy evaluation.
 
-Install the Racket package:
+Install the Racket package from the official catalog:
+
+```bash
+raco pkg install --auto permit
+```
+
+or straight from this repository:
 
 ```bash
 raco pkg install --auto --name permit https://github.com/turlamai/permit.git
@@ -211,7 +217,7 @@ A unique local trial cannot be signed before an app contacts an issuer, so Permi
   (make-local-trial #:duration-seconds (* 14 24 60 60)))
 
 (define result (evaluate-local-trial trial))
-(save-local-state! (local-trial-evaluation-state result))
+(write-local-trial (local-trial-evaluation-state result) "permit-trial.json")
 ```
 
 The state uses a random trial id and a last-seen clock high-water mark. It can also consume verified Protocol v1 `trial-extension` credentials. This is deliberate nuisance resistance, not a claim that an offline local trial cannot be reset by a user controlling the machine.
@@ -226,9 +232,9 @@ This lets a release carry tomorrow's public key before the issuing service switc
 
 ## Deliberate boundary
 
-Permit v0.1 does **not** implement payment processing, customer accounts, email, pricing, tax, a dashboard, hosted metering, or a license server. Commerce owns the family payment-to-rights orchestration path; identity and product services own accounts. These systems may issue and refresh Permit credentials through the explicit issuer API, but they do not belong in the verification core.
+Permit does **not** implement payment processing, customer accounts, email, pricing, tax, a dashboard, hosted metering, or a license server. Commerce owns the family payment-to-rights orchestration path; identity and product services own accounts. These systems may issue and refresh Permit credentials through the explicit issuer API, but they do not belong in the verification core.
 
-Seat allocation, device reclamation, subscription renewal, and credential delivery are Commerce or other management operations. Account recovery remains an identity/product operation. The v0.1 boundary defines the signed artifacts those systems exchange with products.
+Seat allocation, device reclamation, subscription renewal, and credential delivery are Commerce or other management operations. Account recovery remains an identity/product operation. The Protocol v1 boundary defines the signed artifacts those systems exchange with products.
 
 ## Development
 
@@ -239,7 +245,7 @@ raco test -p permit
 ```
 
 The deterministic corpus under [`test-vectors/v1`](test-vectors/v1) is the interoperability contract for other language implementations; the C runner in [`conformance/c`](conformance/c) executes it as an independent implementation.
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete change checklist and [ROADMAP.md](ROADMAP.md) for the evidence required on the path to 1.0.
+See the [documentation map](docs/README.md) for every canonical guide, [CONTRIBUTING.md](CONTRIBUTING.md) for the complete change checklist, and [ROADMAP.md](ROADMAP.md) for the evidence required on the path to 1.0.
 
 ## Repository structure
 
@@ -257,7 +263,7 @@ permit/
 
 ## Status
 
-Protocol v1 is implemented for the v0.1 credential types, but the repository has not declared a stable 1.0 compatibility promise. Security-sensitive fields fail closed; only `extensions` is open-ended.
+Protocol v1 is implemented for every v1 credential type, but the repository has not declared a stable 1.0 compatibility promise. Security-sensitive fields fail closed; only `extensions` is open-ended.
 
 ## License
 

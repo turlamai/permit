@@ -2,7 +2,7 @@
 
 **给独立软件的签名产品权益：离线可验证，需要时也能在线管理。**
 
-[![CI](https://github.com/turlamai/permit/actions/workflows/ci.yml/badge.svg)](https://github.com/turlamai/permit/actions/workflows/ci.yml) ![Racket](https://img.shields.io/badge/Racket-9F1D20?logo=racket&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) ![Protocol](https://img.shields.io/badge/protocol-v1-C15F3C)
+[![CI](https://github.com/turlamai/permit/actions/workflows/ci.yml/badge.svg)](https://github.com/turlamai/permit/actions/workflows/ci.yml) ![Racket](https://img.shields.io/badge/Racket-9F1D20?logo=racket&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) ![Protocol](https://img.shields.io/badge/protocol-v1-C15F3C) [![Version](https://img.shields.io/github/v/release/turlamai/permit?label=version)](https://github.com/turlamai/permit/releases/latest)
 
 [English](README.md) · **中文**
 
@@ -10,15 +10,19 @@ Permit 是一套与应用框架无关的协议及 Racket 参考实现，只回�
 
 > 这个人、组织或安装实例，现在可以使用什么？
 
-支付平台能说明钱是否到账，账号系统能说明谁已登录；Permit 则把长期产品权益变成带签名、可携带的凭证。应用只需内置公开信任库，就能在本地完成验证——不强制账号、不依赖每次联网，也不把商业授权塞进应用框架。
+支付平台能说明钱是否到账，账号系统能说明谁已登录；Permit 则把长期产品权益变成带签名、可携带的凭证。应用只需内置公开信任库，就能在本地完成验证——不强制账号、不依赖每次联网，也不把商业授权塞进应用框架。双语主页见
+[permit.jrtx.site](https://permit.jrtx.site/)。
 
 ## 加密运行环境要求
 
-Permit 必须具备可用的原生 **Ed25519** 实现才能验签或签发。
-Racket 参考实现按固定顺序尝试 OpenSSL 3+、libsodium 和 Nettle，
-它们均是上游 crypto-lib 提供的 Ed25519 实现，而不是降级签名算法。
-如果所有后端均不可用，必须拒绝密码学操作；源码编译成功不代表运行环境受支持。
-见[原生加密后端诊断及官方包构建证据](docs/crypto-runtime.md)。
+Permit 需要一个可用的 **Ed25519** 实现来验签或签发凭证。
+Racket 参考实现按顺序尝试 OpenSSL 3+、libsodium、Nettle（经由显式的上游
+crypto-lib provider），在没有任何可用原生 provider 时回退到纯 Racket 的
+[`ed25519`](https://pkgs.racket-lang.org/package/ed25519) 包。纯 Racket
+回退是完整的 RFC 8032 实现，而不是更弱的算法；正是它保证了签名与验签在
+最小化的包构建环境里也能工作。它非常数时间，生产签发端应尽量使用原生
+provider。运行 `raco permit doctor` 可以 JSON 形式打印选中的后端与各
+provider 的 Ed25519 可用性。见[原生加密后端诊断及官方包构建证据](docs/crypto-runtime.md)。
 
 ## 使用入口
 
@@ -44,7 +48,7 @@ Permit 与应用框架并列组合：
               运行时 / 更新     产品权益
 ```
 
-Rivet 和 Glaze 都不依赖 Permit。更新制品签名与 Permit 凭证签名也始终使用不同的密钥和信任策略。长期依赖方向和职责分工见[框架集成契约](docs/framework-integration.md)。
+[Rivet](https://github.com/turlamai/rivet) 和 [Glaze](https://github.com/turlamai/glaze) 都不依赖 Permit。更新制品签名与 Permit 凭证签名也始终使用不同的密钥和信任策略。长期依赖方向和职责分工见[框架集成契约](docs/framework-integration.md)。
 
 需要在线商业能力的产品可以增加 [Commerce](https://github.com/turlamai/commerce)，负责支付渠道事件、商业状态投影、签发流程与凭证领取。Commerce 只通过显式 issuer API 使用 Permit；Permit 永不依赖 Commerce，产品仍只根据已验证的 Permit 凭证在本地授权。
 
@@ -66,7 +70,13 @@ Protocol v1 用一套词汇覆盖常见商业模型，但不把价格或支付�
 
 如果你第一次接触签名凭证，请先看[从零开始指南](docs/getting-started.zh-CN.md)。它会说明哪些文件必须保密、哪些文件需要随应用发布，以及“验证凭证”和“判断产品权限”为什么是两个步骤。
 
-安装 Racket 包：
+从官方包目录安装 Racket 包：
+
+```bash
+raco pkg install --auto permit
+```
+
+也可以直接从本仓库安装：
 
 ```bash
 raco pkg install --auto --name permit https://github.com/turlamai/permit.git
@@ -84,7 +94,7 @@ raco permit keygen \
   --purpose entitlement
 ```
 
-`--purpose` 可以重复传入，用于生成最小权限签名 key；只有确实要让同一把 key 签全部 v1 凭证的小型部署才应省略。私钥不能进入源码仓库或应用包。可以先从 [`examples/`](examples/) 中选择一份已通过 schema 校验的商业模型模板，再对 payload 文件的原始字节签名：
+`--purpose` 可以重复传入，用于生成最小权限签名 key；只有确实要让同一把 key 签全部 v1 凭证的小型部署才应省略。在 POSIX 系统上 `keygen` 以 `0600` 权限写入私钥；私钥不能进入源码仓库或应用包。可以先从 [`examples/`](examples/) 中选择一份已通过 schema 校验的商业模型模板，再对 payload 文件的原始字节签名：
 
 ```bash
 raco permit issue \
@@ -202,7 +212,7 @@ Protocol v1 包含：
   (make-local-trial #:duration-seconds (* 14 24 60 60)))
 
 (define result (evaluate-local-trial trial))
-(save-local-state! (local-trial-evaluation-state result))
+(write-local-trial (local-trial-evaluation-state result) "permit-trial.json")
 ```
 
 状态使用随机 trial id 与 `last_seen_at` 时钟高水位，也可以消费已经验签的 Protocol v1 `trial-extension`。这只是合理的防误重置能力，不声称能阻止完全控制本机的用户删除或回滚状态。
@@ -217,9 +227,9 @@ Protocol v1 包含：
 
 ## 有意保留的边界
 
-Permit v0.1 **不实现**支付、客户账号、邮件、定价、税务、管理后台、托管计量或完整许可证服务器。家族内从支付到权益的编排由 Commerce 负责，账号由身份/产品服务负责；这些系统可以通过显式 issuer API 签发和刷新 Permit 凭证，但不属于验证核心。
+Permit **不实现**支付、客户账号、邮件、定价、税务、管理后台、托管计量或完整许可证服务器。家族内从支付到权益的编排由 Commerce 负责，账号由身份/产品服务负责；这些系统可以通过显式 issuer API 签发和刷新 Permit 凭证，但不属于验证核心。
 
-席位分配、设备回收、订阅续期和凭证交付属于 Commerce 或其他管理操作，账号恢复仍属于身份/产品服务；v0.1 只定义这些系统与产品之间交换的签名制品。
+席位分配、设备回收、订阅续期和凭证交付属于 Commerce 或其他管理操作，账号恢复仍属于身份/产品服务；Protocol v1 边界定义的就是这些系统与产品之间交换的签名制品。
 
 ## 开发
 
@@ -230,7 +240,7 @@ raco test -p permit
 ```
 
 [`test-vectors/v1`](test-vectors/v1) 下的确定性语料是其他语言实现的互操作契约；[`conformance/c`](conformance/c) 中的 C 运行器即以独立实现身份执行该语料。
-完整变更门槛见 [CONTRIBUTING.md](CONTRIBUTING.md)，走向 1.0 所需的证据见 [ROADMAP.md](ROADMAP.md)。
+所有规范性文档的导航见[文档地图](docs/README.md)；完整变更门槛见 [CONTRIBUTING.md](CONTRIBUTING.md)，走向 1.0 所需的证据见 [ROADMAP.md](ROADMAP.md)。
 
 ## 仓库结构
 
@@ -248,7 +258,7 @@ permit/
 
 ## 状态
 
-Protocol v1 已实现 v0.1 的全部凭证类型，但仓库尚未作出稳定 1.0 的兼容承诺。安全敏感字段一律严格校验并默认拒绝；只有 `extensions` 保持开放扩展。
+Protocol v1 已实现全部 v1 凭证类型，但仓库尚未作出稳定 1.0 的兼容承诺。安全敏感字段一律严格校验并默认拒绝；只有 `extensions` 保持开放扩展。
 
 ## 许可证
 
