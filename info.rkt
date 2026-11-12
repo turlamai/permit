@@ -1,5 +1,7 @@
 #lang info
 
+(define name "permit")
+
 (define collection 'multi)
 (define deps
   '("base"
