@@ -48,8 +48,9 @@ Permit's Racket package may evolve during 0.x, but the project should prefer add
 - When a public name is deprecated, the changelog marks it in one release,
   and it is removed no earlier than the following release. Deprecated names
   keep working, including their security behavior, until removal.
-- Facade changes are slower than internal ones: `(require permit)` and
-  `(require permit/issuer)` are the two public module paths, and the CLI
+- Facade changes are slower than internal ones: `(require permit)`,
+  `(require permit/issuer)`, `(require permit/adapter)`, and the opt-in
+  `(require permit/json)` utility are documented public module paths, and the CLI
   surface documented by `raco permit help` is public operator behavior.
   Everything else is internal in 0.x even when Racket allows requiring it.
 - Protocol v1 vectors and wire semantics are governed by the wire-stability

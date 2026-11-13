@@ -26,6 +26,11 @@ provider 的 Ed25519 可用性。见[原生加密后端诊断及官方包构建�
 
 ## 使用入口
 
+服务端集成需要拒绝重复键的 JSON 读取时，可显式使用 `permit/json` 的
+`read-json-bytes/strict` 和 `read-json-source/strict`。它们只解析数据，
+不验证凭证；调用方须限制输入字节数并脱敏错误。禁止依赖 `permit/private/*`。
+行为与限制见[参考手册](permit-doc/scribblings/permit.scrbl)。
+
 需要签名且可离线验证的权益时，在应用旁组合 Permit。从 entitlement 开始；只有产品明确需要在线租约时才增加 activation。免费产品不需要授权子系统。
 
 [使用选择、成熟度、升级与支持](docs/USING.zh-CN.md) · [English](docs/USING.md)

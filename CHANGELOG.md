@@ -9,6 +9,13 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Publish the existing strict JSON readers as opt-in `permit/json`, with
+  public bytes/port/file regressions and documented limits. Parsing and
+  Protocol v1 semantics are unchanged; integrations no longer need a private
+  module import. Correct the compatibility list to include `permit/adapter`.
+  The development package version is now `0.2.1` so consumers can declare
+  the minimum version providing this module; this does not publish a release.
+
 - Add `raco permit doctor`: one JSON object reporting the selected Ed25519
   backend (`native` or `pure`), whether any native provider is available, each
   provider's version and EdDSA support, and the pure fallback identity. It is

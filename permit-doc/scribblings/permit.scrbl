@@ -4,7 +4,8 @@
                      json
                      permit
                      permit/issuer
-                     permit/adapter))
+                     permit/adapter
+                     permit/json))
 
 @title[#:tag "permit"]{Permit: Signed Product Rights}
 @author[(author+email "Turing Lambda" "jirentianxiang1024@gmail.com")]
@@ -27,6 +28,34 @@ see @hyperlink["https://github.com/turlamai/permit/blob/main/docs/threat-model.m
 threat model} for the honest boundaries. The normative protocol lives in
 @hyperlink["https://github.com/turlamai/permit/blob/main/docs/protocol-v1.md"]{Protocol
 v1}; this manual documents the Racket surface.
+
+@section{Strict JSON utilities}
+
+@defmodule[permit/json]
+
+This opt-in utility is not re-exported by @racketmodname[permit]. Parsing
+does not authenticate input, validate credential claims, or grant rights;
+use @racket[verify-credential] for credentials. Consumers must not import
+@tt{permit/private/*} implementation modules.
+
+@defproc[(read-json-bytes/strict [who symbol?] [raw bytes?]) jsexpr?]{
+Reads exactly one UTF-8 JSON value, rejecting trailing data, recursively
+duplicated decoded object keys (including escaped aliases), invalid scalar
+tokens, malformed JSON, unescaped controls, NUL strings and nesting beyond
+64 containers. Failures raise @racket[exn:fail?] with @racket[who] as the
+diagnostic name. Values follow Racket's @racketmodname[json] reader, including
+the current @racket[json-null] parameter and inexact non-integer numbers;
+callers must validate domain types such as exact money separately.
+}
+
+@defproc[(read-json-source/strict [who symbol?]
+                                [source (or/c input-port? path-string?)]) jsexpr?]{
+Applies the same reader to a file or the remaining bytes of a port. A string
+is a file path, not JSON text. The caller's port is consumed to EOF and left
+open. Both readers buffer the complete input: network callers must enforce
+their own byte limits before reading. Diagnostics may contain input object
+keys; integrations must redact exceptions before logging or returning them.
+}
 
 @section{Trust stores}
 

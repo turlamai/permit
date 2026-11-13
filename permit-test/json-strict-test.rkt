@@ -1,7 +1,45 @@
 #lang racket/base
 
 (require rackunit
-         "../permit/private/json.rkt")
+         racket/file
+         racket/port
+         permit/json)
+
+(test-case "public bytes, port and file readers share strict behavior"
+  (define path (make-temporary-file "permit-json-~a.json"))
+  (dynamic-wind
+    void
+    (lambda ()
+      (for ([raw (in-list
+                  (list #"{\"a\":[true,null,1]}"
+                        #"{\"a\":1,\"\\u0061\":2}"
+                        #"{\"a\":[{\"b\":1,\"b\":2}]}"
+                        #"{} {}" #"[1,]" #"{\"a\":1,}"
+                        (bytes #xff)
+                        (bytes-append (make-bytes 65 91) #"0" (make-bytes 65 93))))]
+            [valid? (in-list '(#t #f #f #f #f #f #f #f))])
+        (call-with-output-file path #:exists 'truncate
+          (lambda (out) (write-bytes raw out)))
+        (for ([read-it (in-list
+                       (list (lambda () (read-json-bytes/strict 'public-json raw))
+                             (lambda ()
+                               (define port (open-input-bytes raw))
+                               (define value (read-json-source/strict 'public-json port))
+                               (check-false (port-closed? port))
+                               (check-true (eof-object? (read-byte port)))
+                               value)
+                             (lambda () (read-json-source/strict 'public-json path))
+                             (lambda () (read-json-source/strict 'public-json (path->string path)))))])
+          (if valid?
+              (check-equal? (read-it) (hasheq 'a '(#t null 1)))
+              (check-exn exn:fail? read-it)))))
+    (lambda () (delete-file path))))
+
+(test-case "public JSON utility rejects unsupported input types"
+  (check-exn exn:fail:contract?
+             (lambda () (read-json-bytes/strict 'public-json "{}")))
+  (check-exn exn:fail:contract?
+             (lambda () (read-json-source/strict 'public-json #"{}"))))
 
 (test-case "strict JSON accepts valid scalar roots"
   (check-equal? (read-json-bytes/strict 'test #" 123 \n") 123)

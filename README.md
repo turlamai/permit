@@ -28,6 +28,12 @@ Ed25519 availability as JSON. See the
 
 ## Start here
 
+Server integrations needing duplicate-rejecting JSON may explicitly use
+`permit/json`: `read-json-bytes/strict` and `read-json-source/strict`.
+These are parsing utilities, not credential verification. Enforce input byte
+limits and redact parse errors; `permit/private/*` is unsupported.
+See the [reference manual](permit-doc/scribblings/permit.scrbl).
+
 Compose Permit beside an application when signed, offline-verifiable rights are needed. Start with an entitlement and omit activation unless the product explicitly needs an online lease. Free products do not need a licensing subsystem.
 
 [Fit, maturity, upgrades and support](docs/USING.md) · [简体中文](docs/USING.zh-CN.md)
