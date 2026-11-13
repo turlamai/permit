@@ -83,7 +83,10 @@ For a bug in authenticated or policy behavior, first add the smallest failing re
 
 ## Stable and internal surfaces
 
-The supported public client surface is `(require permit)`. Issuers use `(require permit/issuer)`. CLI behavior documented in `raco permit help` is public operator behavior.
+The supported public client surface is `(require permit)`. Issuers use
+`(require permit/issuer)`. The documented opt-in `permit/adapter` helper and
+`permit/json` reader are also public; JSON parsing alone conveys no credential
+authority. CLI behavior documented in `raco permit help` is public operator behavior.
 
 Other modules are implementation details in v0.x even when Racket allows requiring them directly. The wire protocol has its own compatibility rules and may be more stable than the Racket API before 1.0.
 
