@@ -1,5 +1,8 @@
 # Permit
 
+Production servers: use a [versioned package installation](docs/production-install.md), not a linked checkout.
+
+
 **Signed product rights for independent software — verifiable offline, manageable online when you need it.**
 
 [![CI](https://github.com/turlamai/permit/actions/workflows/ci.yml/badge.svg)](https://github.com/turlamai/permit/actions/workflows/ci.yml) ![Racket](https://img.shields.io/badge/Racket-9F1D20?logo=racket&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) ![Protocol](https://img.shields.io/badge/protocol-v1-C15F3C) [![Version](https://img.shields.io/github/v/release/turlamai/permit?label=version)](https://github.com/turlamai/permit/releases/latest)
