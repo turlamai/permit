@@ -1,5 +1,8 @@
 # Permit
 
+生产服务器请采用[固定版本包安装](docs/production-install.zh-CN.md)，不使用源码目录链接。
+
+
 **给独立软件的签名产品权益：离线可验证，需要时也能在线管理。**
 
 [![CI](https://github.com/turlamai/permit/actions/workflows/ci.yml/badge.svg)](https://github.com/turlamai/permit/actions/workflows/ci.yml) ![Racket](https://img.shields.io/badge/Racket-9F1D20?logo=racket&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) ![Protocol](https://img.shields.io/badge/protocol-v1-C15F3C) [![Version](https://img.shields.io/github/v/release/turlamai/permit?label=version)](https://github.com/turlamai/permit/releases/latest)
