@@ -71,3 +71,44 @@
                 (hasheq 'value "a\u0001b"))
   (check-exn exn:fail?
              (lambda () (read-json-bytes/strict 'test #"{\"value\":\"a\\u0000b\"}"))))
+
+(test-case "strict JSON depth limit is inclusive and applies to mixed containers"
+  (define (nested-array n)
+    (bytes-append (make-bytes n 91) #"0" (make-bytes n 93)))
+  (define (nested-object n)
+    (if (zero? n) #"0"
+        (bytes-append #"{\"a\":" (nested-object (sub1 n)) #"}")))
+  (for ([make-nested (in-list (list nested-array nested-object))])
+    (check-not-exn (lambda () (read-json-bytes/strict 'test (make-nested 64))))
+    (check-exn exn:fail? (lambda () (read-json-bytes/strict 'test (make-nested 65)))))
+  (check-not-exn
+   (lambda () (read-json-bytes/strict 'test
+                 (bytes-append #"{\"a\":" (nested-array 63) #"}"))))
+  (check-exn exn:fail?
+             (lambda () (read-json-bytes/strict 'test
+                           (bytes-append #"{\"a\":" (nested-array 64) #"}")))))
+
+(test-case "duplicate member detection uses decoded names and object scope"
+  (for ([raw (in-list
+              (list #"{\"x\":0,\"\\u0078\":1}"
+                    #"{\"a/b\":0,\"a\\/b\":1}"
+                    #"{\"a\":[{\"x\":0,\"\\u0078\":1}]}"
+                    (string->bytes/utf-8 "{\"é\":0,\"\\u00e9\":1}")))])
+    (check-exn exn:fail? (lambda () (read-json-bytes/strict 'test raw))))
+  (check-not-exn
+   (lambda () (read-json-bytes/strict 'test #"[{\"x\":0},{\"x\":1}]")))
+  (check-not-exn
+   (lambda () (read-json-bytes/strict 'test #"{\"x\":{\"x\":0}}"))))
+
+(test-case "invalid UTF-8 and raw controls cannot cross the JSON boundary"
+  (for ([raw (in-list
+              (list (bytes #xc0 #xaf) (bytes #xe2 #x82)
+                    (bytes #xed #xa0 #x80) (bytes #xf4 #x90 #x80 #x80)
+                    (bytes #x80)))])
+    (check-exn exn:fail?
+               (lambda () (read-json-bytes/strict 'test
+                             (bytes-append #"\"" raw #"\"")))))
+  (for ([code (in-range 32)])
+    (check-exn exn:fail?
+               (lambda () (read-json-bytes/strict 'test
+                             (bytes 34 code 34))))))
