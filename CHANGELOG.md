@@ -7,6 +7,10 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Add an opt-in Ed25519 signing and verification benchmark with JSON output,
+  backend diagnostics and an execution smoke test; no timing thresholds or
+  production key material.
+
 - Extend Ed25519 provider-mode regression tests with RFC 8032 test 2,
   deterministic key derivation and signing, message tampering, signature
   mutations and invalid signature lengths. No runtime behavior changes.
