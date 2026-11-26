@@ -89,3 +89,22 @@ Before calling a release or this issue resolved:
 This is operational backend selection, not key custody, a protocol change,
 a relaxation of Ed25519 verification, or permission to place private keys
 in customer applications.
+
+## Reproducible performance measurements
+
+From a checkout with Permit installed, run:
+
+```sh
+racket examples/crypto-benchmark.rkt --backend auto --iterations 100
+racket examples/crypto-benchmark.rkt --backend pure --iterations 100
+racket examples/crypto-benchmark.rkt --backend native --iterations 100
+raco test examples/crypto-benchmark.rkt
+```
+
+Native mode fails explicitly when unavailable. Each run generates an ephemeral key,
+warms up both operations and measures signing and verification separately using
+monotonic wall-clock time for a fixed 1024-byte message. JSON includes the Racket
+version, OS, architecture, requested mode, provider report, iteration count and
+elapsed/mean milliseconds. Compare repeated runs on the same machine and runtime;
+no universal latency target is implied. This does not benchmark complete credential
+policy evaluation or demonstrate constant-time behavior. Never use production keys.
