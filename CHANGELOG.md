@@ -7,6 +7,10 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Extend strict JSON regression coverage for decoded duplicate member names,
+  object-local scope, the exact nesting limit, malformed UTF-8 and all raw
+  control bytes. No protocol or parser semantics change.
+
 ## [0.2.1] - 2026-11-23
 
 ### Added
