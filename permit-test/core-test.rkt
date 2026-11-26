@@ -108,7 +108,7 @@
 
 (define default-grant
   (hasheq 'scope
-          (hasheq 'products '("gptp-studio" "benchpilot")
+          (hasheq 'products '("gptp-studio" "example-diagnostics")
                   'product_families '("automotive-tools"))
           'edition
           "team"
@@ -329,7 +329,7 @@
                    "gptp-studio"
                    "2035-01-01T00:00:00Z"
                    #:at "2035-01-01T00:00:00Z"))
-(check-equal? (capability-value perpetual "benchpilot" 'team-members) 5)
+(check-equal? (capability-value perpetual "example-diagnostics" 'team-members) 5)
 (check-equal? (limit-value perpetual 'named_seats) 5)
 (check-true
  (edition-entitled? perpetual "unknown-product" "team" #:product-family "automotive-tools"))
