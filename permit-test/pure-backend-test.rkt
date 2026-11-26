@@ -149,3 +149,41 @@
     (check-equal? (format "~s" private) "#<ed25519-key>")
     (check-true (ed25519-verify public #"redacted"
                                 (ed25519-sign private #"redacted")))))
+
+(test-case "RFC 8032 test 2 and signature length boundaries across backends"
+  ;; RFC 8032 section 7.1, TEST 2: a one-byte message.
+  (define seed
+    (hex->bytes "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb"))
+  (define expected-public
+    (hex->bytes "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"))
+  (define expected-signature
+    (hex->bytes
+     (string-append "92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da"
+                    "085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00")))
+  (define message (bytes #x72))
+  (define backends
+    (if (hash-ref (ed25519-provider-report) 'native-available?)
+        '(pure native auto)
+        '(pure auto)))
+  (for ([backend (in-list backends)])
+    (parameterize ([current-ed25519-backend backend])
+      (call-with-temporary-bytes
+       (private-key-der seed)
+       (lambda (private-path)
+         (call-with-temporary-bytes
+          (public-key-der expected-public)
+          (lambda (public-path)
+            (define private (read-ed25519-private-key private-path))
+            (define public (read-ed25519-public-key public-path))
+            (check-equal? (ed25519-public-key->der
+                           (ed25519-private-key->public-key private))
+                          (public-key-der expected-public))
+            (check-equal? (ed25519-sign private message) expected-signature)
+            (check-true (ed25519-verify public message expected-signature))
+            (check-false (ed25519-verify public #"s" expected-signature))
+            (for ([length (in-list '(0 1 31 32 63 65 128))])
+              (check-false (ed25519-verify public message (make-bytes length 0))))
+            (for ([index (in-list '(0 31 32 63))])
+              (define changed (bytes-copy expected-signature))
+              (bytes-set! changed index (bitwise-xor 1 (bytes-ref changed index)))
+              (check-false (ed25519-verify public message changed))))))))))
