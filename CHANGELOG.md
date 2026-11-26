@@ -7,6 +7,10 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Extend Ed25519 provider-mode regression tests with RFC 8032 test 2,
+  deterministic key derivation and signing, message tampering, signature
+  mutations and invalid signature lengths. No runtime behavior changes.
+
 - Extend strict JSON regression coverage for decoded duplicate member names,
   object-local scope, the exact nesting limit, malformed UTF-8 and all raw
   control bytes. No protocol or parser semantics change.
