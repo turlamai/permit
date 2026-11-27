@@ -7,6 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-27
+
+- Add a separate full credential verification and cached entitlement policy benchmark, with expected allow/deny assertions and JSON results.
+- Collect crypto and credential benchmark artifacts across Linux, macOS and Windows, with 100 iterations on relevant main pushes and two on PR smoke runs. Native availability is explicit. No production latency guarantees.
+
 - Add an opt-in Ed25519 signing and verification benchmark with JSON output,
   backend diagnostics and an execution smoke test; no timing thresholds or
   production key material.
