@@ -115,3 +115,16 @@ run two iterations as a smoke check; manual dispatch runs 100 per mode. Download
 the JSON artifacts for the exact commit and runner. An unavailable native
 provider is recorded explicitly; `auto` and `pure` must both execute successfully.
 Hosted runner measurements are diagnostic, not stable production latency targets.
+
+## Credential verification and policy benchmark
+
+Run `racket examples/credential-benchmark.rkt --backend auto --iterations 100`
+(or `pure` / `native`). The fixed perpetual entitlement fixture is signed with
+an ephemeral key and evaluated at a fixed timestamp. Measurements separately
+cover serialized-envelope parsing, signature and credential validation;
+cached usability plus allowed/denied edition decisions; and the combined path.
+The trust store is initialized outside the timed region. Every policy iteration
+checks the expected outcomes. This is a narrow local entitlement scenario, not
+network activation, disk persistence, all policy combinations or production
+latency certification. Run `raco test examples/credential-benchmark.rkt` for
+the small pure-backend regression. No production credential input is accepted.

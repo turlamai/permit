@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/crypto-benchmark.yml'
       - 'examples/crypto-benchmark.rkt'
+      - 'examples/credential-benchmark.rkt'
+      - 'examples/perpetual.json'
 
 permissions:
   contents: read
@@ -37,12 +39,15 @@ jobs:
           if [ "$EVENT" = pull_request ]; then iterations=2; fi
           for mode in auto pure; do
             racket examples/crypto-benchmark.rkt --backend "$mode" --iterations "$iterations" > "benchmark-results/$mode.json"
+            racket examples/credential-benchmark.rkt --backend "$mode" --iterations "$iterations" > "benchmark-results/credential-$mode.json"
           done
           available=$(racket -e '(require permit/crypto) (display (if (hash-ref (ed25519-provider-report) (quote native-available?)) "yes" "no"))')
           if [ "$available" = yes ]; then
             racket examples/crypto-benchmark.rkt --backend native --iterations "$iterations" > benchmark-results/native.json
+            racket examples/credential-benchmark.rkt --backend native --iterations "$iterations" > benchmark-results/credential-native.json
           elif [ "$available" = no ]; then
             printf '%s\n' '{"status":"unavailable","requested_backend":"native"}' > benchmark-results/native.json
+            cp benchmark-results/native.json benchmark-results/credential-native.json
           else
             exit 1
           fi
