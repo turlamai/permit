@@ -1,0 +1,55 @@
+name: Crypto benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/crypto-benchmark.yml'
+      - 'examples/crypto-benchmark.rkt'
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Bogdanp/setup-racket@v1.14
+        with:
+          version: "9.3"
+      - name: Install package
+        run: raco pkg install --auto --no-docs --name permit "$GITHUB_WORKSPACE"
+      - name: Collect measurement
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          mkdir -p benchmark-results
+          iterations=100
+          if [ "$EVENT" = pull_request ]; then iterations=2; fi
+          for mode in auto pure; do
+            racket examples/crypto-benchmark.rkt --backend "$mode" --iterations "$iterations" > "benchmark-results/$mode.json"
+          done
+          available=$(racket -e '(require permit/crypto) (display (if (hash-ref (ed25519-provider-report) (quote native-available?)) "yes" "no"))')
+          if [ "$available" = yes ]; then
+            racket examples/crypto-benchmark.rkt --backend native --iterations "$iterations" > benchmark-results/native.json
+          elif [ "$available" = no ]; then
+            printf '%s\n' '{"status":"unavailable","requested_backend":"native"}' > benchmark-results/native.json
+          else
+            exit 1
+          fi
+      - name: Upload measurements
+        uses: actions/upload-artifact@v4
+        with:
+          name: permit-crypto-${{ matrix.os }}-${{ github.sha }}
+          path: benchmark-results/*.json
+          if-no-files-found: error
+          retention-days: 30

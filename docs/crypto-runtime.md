@@ -108,3 +108,10 @@ version, OS, architecture, requested mode, provider report, iteration count and
 elapsed/mean milliseconds. Compare repeated runs on the same machine and runtime;
 no universal latency target is implied. This does not benchmark complete credential
 policy evaluation or demonstrate constant-time behavior. Never use production keys.
+
+The GitHub Actions `Crypto benchmark` workflow runs the same tool on Linux,
+macOS and Windows with Racket 9.3. Pull requests changing the tool or workflow
+run two iterations as a smoke check; manual dispatch runs 100 per mode. Download
+the JSON artifacts for the exact commit and runner. An unavailable native
+provider is recorded explicitly; `auto` and `pure` must both execute successfully.
+Hosted runner measurements are diagnostic, not stable production latency targets.
