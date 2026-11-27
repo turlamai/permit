@@ -62,6 +62,8 @@ jobs:
           else
             exit 1
           fi
+      - name: Test summary renderer
+        run: raco test scripts/benchmark-summary.rkt
       - name: Publish measurement summary
         run: racket scripts/benchmark-summary.rkt benchmark-results >> "$GITHUB_STEP_SUMMARY"
       - name: Upload measurements
