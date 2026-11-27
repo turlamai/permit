@@ -9,6 +9,7 @@ on:
       - 'examples/crypto-benchmark.rkt'
       - 'examples/credential-benchmark.rkt'
       - 'examples/perpetual.json'
+      - 'scripts/benchmark-summary.rkt'
       - 'permit/**'
       - 'info.rkt'
   pull_request:
@@ -17,6 +18,7 @@ on:
       - 'examples/crypto-benchmark.rkt'
       - 'examples/credential-benchmark.rkt'
       - 'examples/perpetual.json'
+      - 'scripts/benchmark-summary.rkt'
 
 permissions:
   contents: read
@@ -60,6 +62,8 @@ jobs:
           else
             exit 1
           fi
+      - name: Publish measurement summary
+        run: racket scripts/benchmark-summary.rkt benchmark-results >> "$GITHUB_STEP_SUMMARY"
       - name: Upload measurements
         uses: actions/upload-artifact@v4
         with:
