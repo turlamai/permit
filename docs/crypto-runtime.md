@@ -108,3 +108,16 @@ version, OS, architecture, requested mode, provider report, iteration count and
 elapsed/mean milliseconds. Compare repeated runs on the same machine and runtime;
 no universal latency target is implied. This does not benchmark complete credential
 policy evaluation or demonstrate constant-time behavior. Never use production keys.
+
+## Credential verification and policy benchmark
+
+Run `racket examples/credential-benchmark.rkt --backend auto --iterations 100`
+(or `pure` / `native`). The fixed perpetual entitlement fixture is signed with
+an ephemeral key and evaluated at a fixed timestamp. Measurements separately
+cover serialized-envelope parsing, signature and credential validation;
+cached usability plus allowed/denied edition decisions; and the combined path.
+The trust store is initialized outside the timed region. Every policy iteration
+checks the expected outcomes. This is a narrow local entitlement scenario, not
+network activation, disk persistence, all policy combinations or production
+latency certification. Run `raco test examples/credential-benchmark.rkt` for
+the small pure-backend regression. No production credential input is accepted.
