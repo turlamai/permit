@@ -111,7 +111,9 @@ policy evaluation or demonstrate constant-time behavior. Never use production ke
 
 The GitHub Actions `Crypto benchmark` workflow runs the same tool on Linux,
 macOS and Windows with Racket 9.3. Pull requests changing the tool or workflow
-run two iterations as a smoke check; manual dispatch runs 100 per mode. Download
+run two iterations as a smoke check; manual dispatch and relevant main pushes
+run 100 per mode. Main triggers cover benchmark fixtures, workflow, library
+source and package metadata. Download
 the JSON artifacts for the exact commit and runner. An unavailable native
 provider is recorded explicitly; `auto` and `pure` must both execute successfully.
 Hosted runner measurements are diagnostic, not stable production latency targets.
