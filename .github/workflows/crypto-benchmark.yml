@@ -2,6 +2,15 @@ name: Crypto benchmark
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/crypto-benchmark.yml'
+      - 'examples/crypto-benchmark.rkt'
+      - 'examples/credential-benchmark.rkt'
+      - 'examples/perpetual.json'
+      - 'permit/**'
+      - 'info.rkt'
   pull_request:
     paths:
       - '.github/workflows/crypto-benchmark.yml'
